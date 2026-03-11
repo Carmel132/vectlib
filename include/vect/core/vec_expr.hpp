@@ -27,6 +27,8 @@ namespace vect::core {
     };
 
     template <typename T>
-    concept IsVecExpr = std::derived_from<T, VecExpr<T>>;
+    concept IsVecExpr = std::derived_from<std::decay_t<T>, VecExpr<std::decay_t<T>>>;
 
+    template <typename T>
+    concept IsVec3Expr = IsVecExpr<T> && T::dim == 3;
 }

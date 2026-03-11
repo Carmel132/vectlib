@@ -12,4 +12,31 @@ namespace vect
 
     using expr::dot;
     using expr::cross;
+    using expr::sum;
+    using expr::norm;
+    using expr::normSquared;
+    using expr::normalize;
+    using expr::lerp;
+    using expr::project;
+    using expr::reject;
+    using expr::reflect;
+    using expr::map;
+    using expr::max;
+    using expr::min;
+    using expr::abs;
+    using expr::sqrt;
+    using expr::exp;
+    using expr::log;
+    using expr::negate;
+    using expr::sin;
+    using expr::cos;
+    using expr::tan;
+    using expr::asin;
+    using expr::acos;
+    using expr::atan;
+    using expr::floor;
+    using expr::ceil;
+    using expr::round;
+    using expr::sign;
+    using expr::fract;
 }

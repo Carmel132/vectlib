@@ -10,6 +10,7 @@ namespace vect::core {
     class VecScalar : public core::VecExpr<VecScalar<T>> {
         T val_;
     public:
+        static constexpr size_t dim = 0; // size agnostic
         using valueType = T;
 
         explicit VecScalar(T v) : val_{v} {}

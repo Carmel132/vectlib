@@ -1,6 +1,7 @@
 #pragma once
 #include "vect/expr/binary_op.hpp"
 #include "vect/core/scalar.hpp"
+#include "vect/expr/vector_method.hpp"
 #include <functional>
 namespace vect::core {
     template <IsVecExpr L, IsVecExpr R>
@@ -13,6 +14,12 @@ namespace vect::core {
     auto operator-(const L& l, const R& r) {
         return expr::BinaryOp<L, R, std::minus<>>(l, r);
     }
+
+    template <IsVecExpr V>
+    constexpr auto operator-(const V& v) {
+        return expr::negate(v);
+    }
+
 
     // Component-wise and scalar multiplication  
     template <IsVecExpr L, IsVecExpr R>
@@ -29,6 +36,12 @@ namespace vect::core {
     template <Scalar S, IsVecExpr V>
     auto operator*(S s, const V& v) {
         return v * s;
+    }
+
+    template <IsVecExpr V, Scalar S>
+    auto operator/(const V& v, S s) {
+        using ScalarExpr = VecScalar<S>;
+        return expr::BinaryOp<V, ScalarExpr, std::divides<>>(v, ScalarExpr(s));
     }
 
     

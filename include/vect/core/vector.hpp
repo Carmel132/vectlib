@@ -11,6 +11,8 @@ namespace vect::core
     public:
         std::array<T, N> data_{};
         using valueType = T;
+        static constexpr size_t dim = N;
+
 
         /// @brief Direct `VecExpr` initializer
         /// @param expr the `VecExp` to initialize a vector from

@@ -12,7 +12,7 @@ namespace vect::expr
 
     public:
         using valueType = std::common_type_t<typename L::valueType, typename R::valueType>;
-
+        static constexpr size_t dim = L::dim;
         BinaryOp(const L &l, const R &r, Op op = Op{}) : l_{l}, r_{r}, op_{op} {}
 
         auto operator[](size_t idx) const -> valueType

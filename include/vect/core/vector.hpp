@@ -1,38 +1,23 @@
 #pragma once
 #include <array>
-#include <cmath>
-#include <cstddef>
+#include <vect/core/vec_expr.hpp>
 namespace vect::core
 {
 
-    template <typename Derived>
-    class VecExpr
-    {
-        VecExpr() = default;
-
-    public:
-        [[nodiscard]] auto self() const -> const Derived &
-        {
-            return static_cast<const Derived &>(*this);
-        }
-
-        auto operator[](size_t idx) const
-        {
-            return self()[idx];
-        }
-
-        [[nodiscard]] auto size() const -> size_t
-        {
-            return self().size();
-        }
-        friend Derived;
-    };
-
+    
     template <typename T, size_t N>
     class Vector : public VecExpr<Vector<T, N>>
     {
     public:
         std::array<T, N> data_{};
+        using valueType = T;
+
+        /// @brief Direct `VecExpr` initializer
+        /// @param expr the `VecExp` to initialize a vector from
+        template <typename Expr>
+        Vector(const VecExpr<Expr> &expr) : Vector(expr, std::make_index_sequence<N>{}){
+
+        }
 
         constexpr Vector(std::initializer_list<T> list)
         {
@@ -55,5 +40,9 @@ namespace vect::core
 
             return *this;
         }
+
+        private:
+        template <typename Expr, size_t... Ints>
+        Vector(const VecExpr<Expr> &expr, std::index_sequence<Ints...>) : data_{expr.self()[Ints]...} {}
     };
 }

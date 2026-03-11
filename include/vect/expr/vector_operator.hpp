@@ -1,6 +1,6 @@
 #pragma once
-#include "vect/expr/vector.hpp"
 #include "vect/expr/binary_op.hpp"
+#include "vect/core/scalar.hpp"
 #include <functional>
 namespace vect::core {
     template <IsVecExpr L, IsVecExpr R>
@@ -31,13 +31,5 @@ namespace vect::core {
         return v * s;
     }
 
-    template <IsVecExpr L, IsVecExpr R>
-    auto operator^(const L& l, const R& r) {
-        using T = std::common_type_t<typename L::valueType, typename R::valueType>;
-        T sum = 0;
-        for (size_t idx{}; idx < l.size(); ++idx) {
-            sum += l[idx] * r[idx];
-        }
-        return sum;
-    }
+    
 }

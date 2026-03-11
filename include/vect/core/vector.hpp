@@ -21,7 +21,11 @@ namespace vect::core
 
         constexpr Vector(std::initializer_list<T> list)
         {
-            std::copy(list.begin(), list.end(), data_.begin());
+            size_t i = 0;
+            for (const auto& val : list) {
+                if (i >= N) break;
+                data_[i++] = val;
+            }
         }
 
         constexpr auto operator[](size_t idx) -> T & { return data_[idx]; }

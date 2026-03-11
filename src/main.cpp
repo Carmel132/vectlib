@@ -17,9 +17,10 @@ int main()
     vect::Vector<double, 3> v2{1, 0, 2};
 
     //vect::Vector<double, 3> v3 = v1 * 5.;
+    
+    auto d = vect::dot(v1, v2);
 
-    auto d = v1 ^ v2;
-    std::print("dot: {}\n", d);
-    //printVector(v3);
+    auto v3 = vect::cross(vect::Vector<double, 2>{1, 2}, vect::Vector<double, 2>{1, 0});
+    printVector(v3);
     return 0;
 }

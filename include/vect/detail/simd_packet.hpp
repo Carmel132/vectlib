@@ -9,6 +9,11 @@ namespace vect::detail
   {
     __m128 reg;
 
+    void store(float* dest) const 
+    {
+      _mm_store_ps(dest, reg);
+    }
+
     friend auto operator+(Packet4f a, Packet4f b) -> Packet4f
     {
       return {_mm_add_ps(a.reg, b.reg)};
@@ -31,10 +36,5 @@ namespace vect::detail
     }
   };
 
-  template <typename T, size_t N>
-  struct SimdTraits
-  {
-    static constexpr bool available = (std::is_same_v<T, float> && N >= 4);
-    using packetType = std::conditional_t<available, Packet4f, T>;
-  };
+  
 }

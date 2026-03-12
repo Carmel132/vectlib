@@ -1,6 +1,7 @@
 #pragma once
 #include "vect/core/vec_expr.hpp"
 #include "vect/expr/capture_strategy.hpp"
+#include "vect/detail/simd_packet.hpp"
 namespace vect::expr
 {
     template <typename L, typename R, typename Op>
@@ -27,7 +28,22 @@ namespace vect::expr
 
         auto loadPacket(size_t idx) const
         {
-            return Op{}(l_.loadPacket(), r_.loadPacket());
+            auto leftPacket = l_.loadPacket(idx);
+            auto rightPacket = r_.loadPacket(idx);
+
+            if constexpr (requires {op_(leftPacket, rightPacket); }) {
+                return op_(leftPacket, rightPacket);
+            }
+
+            alignas(16)float lvals[4];
+            alignas(16)float rvals[4];
+            detail::Packet4f result;
+            _mm_store_ps(lvals, leftPacket.reg);
+            _mm_store_ps(rvals, rightPacket.reg);
+            for (int j = 0; j < 4; ++j) {
+                result.reg[j] = op_(lvals[j], rvals[j]);
+            }
+            return result;
         }
     };
 }

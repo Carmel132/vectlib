@@ -2,6 +2,8 @@
 #include "vect/core/vec_expr.hpp"
 #include "vect/core/vector.hpp"
 #include "vect/expr/capture_strategy.hpp"
+#include "vect/detail/simd_packet.hpp"
+
 
 namespace vect::expr
 {
@@ -23,7 +25,17 @@ namespace vect::expr
         [[nodiscard]] constexpr auto size() const -> size_t{ return v_.size(); }
 
         auto loadPacket(size_t idx) const {
-            return v_.loadPacket(idx);
+            auto packet = v_.loadPacket(idx);
+
+            if constexpr (requires {op_(packet); }) {
+                return op_(packet);
+            }
+
+            detail::Packet4f result;
+            for (int j = 0; j < 4; ++j) {
+                result.reg[j] = op_(packet.reg[j]);
+            }
+            return result;
         }
     };
 }

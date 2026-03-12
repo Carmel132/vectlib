@@ -1,9 +1,11 @@
 #pragma once
-#include "vect/detail/simd_packet.hpp"
+#include "vect/detail/simd_traits.hpp"
 #include <array>
 #include <immintrin.h>
 #include <vect/core/vec_expr.hpp>
 
+#include <bit>
+// WTODO: remove iostream include lol
 #include <iostream>
 // TODO: remove immintrin include and define loadPacket in different file
 namespace vect::core
@@ -13,7 +15,10 @@ namespace vect::core
     class Vector : public VecExpr<Vector<T, N>>
     {
     public:
-        alignas(sizeof(T) * (N == 3 ? 4 : N))
+        
+        static constexpr size_t alignment = detail::SimdTraits<T, N>::alignment;
+
+        alignas(alignment)
             std::array<T, N> data_{};
         using valueType = T;
         static constexpr size_t dim = N;
@@ -68,7 +73,7 @@ namespace vect::core
 
         auto loadPacket(size_t idx) const
         {
-            return _mm_load_ps(&data_[idx]);
+            return detail::Packet4f{_mm_load_ps(&data_[idx])};
         }
 
     private:

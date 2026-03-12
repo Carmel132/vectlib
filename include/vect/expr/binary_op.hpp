@@ -20,12 +20,14 @@ namespace vect::expr
             return op_(l_[idx], r_[idx]);
         }
 
-        [[nodiscard]] auto size() const -> size_t { 
+        [[nodiscard]] auto size() const -> size_t
+        {
             return l_.size() != 0 ? l_.size() : r_.size();
-         }
+        }
 
-         auto loadPacket(size_t idx) const {
-            return l_.loadPacket(idx) + r_.loadPacket(idx);
-         }
+        auto loadPacket(size_t idx) const
+        {
+            return Op{}(l_.loadPacket(), r_.loadPacket());
+        }
     };
 }

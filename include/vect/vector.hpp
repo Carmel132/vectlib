@@ -1,44 +1,43 @@
 #pragma once
-#include "vect/core/vector.hpp"
-#include "vect/expr/vector_operator.hpp"
 #include "vect/core/scalar.hpp"
-#include "vect/expr/vector_method.hpp"
+#include "vect/core/vector.hpp"
 #include "vect/expr/swizzle.hpp"
+#include "vect/expr/vector_method.hpp"
+#include "vect/expr/vector_operator.hpp"
 namespace vect
 {
-
     template <typename T, size_t N>
     using Vector = core::Vector<T, N>;
 
-    using expr::dot;
+    using expr::abs;
+    using expr::acos;
+    using expr::asin;
+    using expr::atan;
+    using expr::ceil;
+    using expr::cos;
     using expr::cross;
-    using expr::sum;
-    using expr::norm;
-    using expr::normSquared;
-    using expr::normalize;
+    using expr::dot;
+    using expr::exp;
+    using expr::floor;
+    using expr::fract;
     using expr::lerp;
-    using expr::project;
-    using expr::reject;
-    using expr::reflect;
+    using expr::log;
     using expr::map;
     using expr::max;
     using expr::min;
-    using expr::abs;
-    using expr::sqrt;
-    using expr::exp;
-    using expr::log;
     using expr::negate;
-    using expr::sin;
-    using expr::cos;
-    using expr::tan;
-    using expr::asin;
-    using expr::acos;
-    using expr::atan;
-    using expr::floor;
-    using expr::ceil;
+    using expr::norm;
+    using expr::normalize;
+    using expr::normSquared;
+    using expr::project;
+    using expr::reflect;
+    using expr::reject;
     using expr::round;
     using expr::sign;
-    using expr::fract;
+    using expr::sin;
+    using expr::sqrt;
+    using expr::sum;
+    using expr::tan;
 
     using float2 = core::Vector<float, 2>;
     using float3 = core::Vector<float, 3>;

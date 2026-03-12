@@ -21,5 +21,9 @@ namespace vect::expr
             return op_(v_[idx]);
         }
         [[nodiscard]] constexpr auto size() const -> size_t{ return v_.size(); }
+
+        auto loadPacket(size_t idx) const {
+            return v_.loadPacket(idx);
+        }
     };
 }

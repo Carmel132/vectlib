@@ -13,15 +13,16 @@ void printVector(const vect::core::VecExpr<T> &vec)
 
 int main()
 {
-    vect::Vector<double, 3> v1{1, 2, 3};
-    vect::Vector<double, 3> v2{1, 0, 2};
+    vect::Vector<float, 4> v1{1, 2, 3};
+    vect::Vector<float, 4> v2{1, 2, 3};
 
     //vect::Vector<double, 3> v3 = v1 * 5.;
     
     auto d = vect::dot(v1, v2);
 
     auto v3 = vect::cross(vect::Vector<double, 3>{1, 2}, vect::Vector<double, 3>{1, 0});
-    printVector(vect::max(v1, 2));
+    std::cout << v1.swizzle<2, 0, 1>();
+    std::print("Should be equal: {}, should not (different): {}, should not (size): {}", v1==v2, vect::sin(v1) == v2, v1.swizzle<2, 0>() == v2);
     //std::println("Sum: {}", );
     return 0;
 }

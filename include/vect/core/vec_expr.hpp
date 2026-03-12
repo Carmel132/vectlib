@@ -24,7 +24,19 @@ namespace vect::core {
             return self().size();
         }
         friend Derived;
+    
+    
+        template <size_t... Indices>
+        constexpr auto swizzle() const;
+    
+        constexpr auto loadPacket(size_t idx) const {
+            return static_cast<const Derived*>(this)->loadPacket(idx);
+        }
+
     };
+
+
+
 
     template <typename T>
     concept IsVecExpr = std::derived_from<std::decay_t<T>, VecExpr<std::decay_t<T>>>;

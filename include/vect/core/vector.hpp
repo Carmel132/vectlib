@@ -1,6 +1,11 @@
 #pragma once
 #include <array>
 #include <vect/core/vec_expr.hpp>
+#include <immintrin.h>
+#include "vect/detail/simd_packet.hpp"
+
+#include <iostream>
+// TODO: remove immintrin include and define loadPacket in different file
 namespace vect::core
 {
 
@@ -9,6 +14,7 @@ namespace vect::core
     class Vector : public VecExpr<Vector<T, N>>
     {
     public:
+        alignas(sizeof(T) * (N==3 ? 4 : N))
         std::array<T, N> data_{};
         using valueType = T;
         static constexpr size_t dim = N;
@@ -35,16 +41,29 @@ namespace vect::core
 
         [[nodiscard]] constexpr auto size() const -> size_t { return N; }
 
-        template <typename Expr>
-        auto operator=(const VecExpr<Expr> &expr) -> Vector &
-        {
-            const Expr &e = expr.self();
-            for (size_t idx{}; idx < N; ++idx)
-            {
-                data_[idx] = e[idx];
+        template <typename V>
+        Vector<T, N>& operator=(const VecExpr<V>& expr) {
+            const V& derived = static_cast<const V&>(expr);
+            size_t idx = 0;
+
+            if constexpr (detail::simdTraits<T, N>::available) {
+                for (; idx <= N - 4; idx += 4) {
+                    auto packet = derived.loadPacket(idx);
+                    _mm_store_ps(&data_[idx], packet.reg);
+                }
+                
+                std::cout << "Hallo!";
+            }
+
+            for (; idx < N; ++idx) {
+                data_[idx] = derived[idx];
             }
 
             return *this;
+        } 
+
+        auto loadPacket(size_t idx) const {
+            return _mm_load_ps(&data_[idx]);
         }
 
         private:

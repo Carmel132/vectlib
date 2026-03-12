@@ -3,7 +3,7 @@
 #include "vect/expr/vector_operator.hpp"
 #include "vect/core/scalar.hpp"
 #include "vect/expr/vector_method.hpp"
-
+#include "vect/expr/swizzle.hpp"
 namespace vect
 {
 
@@ -39,4 +39,9 @@ namespace vect
     using expr::round;
     using expr::sign;
     using expr::fract;
+
+    using float2 = core::Vector<float, 2>;
+    using float3 = core::Vector<float, 3>;
+
+    using float4 = core::Vector<float, 4>;
 }

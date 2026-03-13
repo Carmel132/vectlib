@@ -34,7 +34,6 @@ namespace vect::detail
         }
     };
 
-    // Additional functions for Packet4d
     inline double dot(Packet4d a, Packet4d b) {
         __m256d prod = _mm256_mul_pd(a.reg, b.reg);
         __m256d sum1 = _mm256_hadd_pd(prod, prod);

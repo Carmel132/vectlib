@@ -216,6 +216,45 @@ TEST(SimdTraitsTest, VectorAlignment) {
     EXPECT_EQ(alignof(float2), (detail::SimdTraits<float, 2>::alignment));
 }
 
+TEST(VectorSwizzleTest, BasicSwizzle) {
+    // Test swizzle on SIMD-accelerated float4
+    float4 v{1.0f, 2.0f, 3.0f, 4.0f};
+
+    // Identity swizzle
+    auto sw_identity = v.swizzle<0,1,2,3>();
+    EXPECT_FLOAT_EQ(sw_identity[0], 1.0f);
+    EXPECT_FLOAT_EQ(sw_identity[1], 2.0f);
+    EXPECT_FLOAT_EQ(sw_identity[2], 3.0f);
+    EXPECT_FLOAT_EQ(sw_identity[3], 4.0f);
+
+    // Reorder components
+    auto sw_reorder = v.swizzle<1,0,3,2>();
+    EXPECT_FLOAT_EQ(sw_reorder[0], 2.0f);
+    EXPECT_FLOAT_EQ(sw_reorder[1], 1.0f);
+    EXPECT_FLOAT_EQ(sw_reorder[2], 4.0f);
+    EXPECT_FLOAT_EQ(sw_reorder[3], 3.0f);
+
+    // Duplicate components
+    auto sw_dup = v.swizzle<0,0,1,1>();
+    EXPECT_FLOAT_EQ(sw_dup[0], 1.0f);
+    EXPECT_FLOAT_EQ(sw_dup[1], 1.0f);
+    EXPECT_FLOAT_EQ(sw_dup[2], 2.0f);
+    EXPECT_FLOAT_EQ(sw_dup[3], 2.0f);
+
+    // Test on smaller vector (float2, not SIMD-accelerated)
+    float2 v2{5.0f, 6.0f};
+    auto sw2 = v2.swizzle<1,0>();
+    EXPECT_FLOAT_EQ(sw2[0], 6.0f);
+    EXPECT_FLOAT_EQ(sw2[1], 5.0f);
+
+    // Test swizzle with operations (expression template)
+    auto sw_op = (v * 2.0f).swizzle<2,3,0,1>();
+    EXPECT_FLOAT_EQ(sw_op[0], 6.0f);  // 3*2
+    EXPECT_FLOAT_EQ(sw_op[1], 8.0f);  // 4*2
+    EXPECT_FLOAT_EQ(sw_op[2], 2.0f);  // 1*2
+    EXPECT_FLOAT_EQ(sw_op[3], 4.0f);  // 2*2
+}
+
 template <typename T, size_t N>
 void ValidateSimdTraits() {
     using Traits = detail::SimdTraits<T, N>;

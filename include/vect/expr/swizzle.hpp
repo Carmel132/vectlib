@@ -4,6 +4,8 @@
 #include "vect/core/vec_expr.hpp"
 #include "vect/expr/capture_strategy.hpp"
 
+#include "vect/detail/simd_traits.hpp"
+
 #include <array>
 
 namespace vect::expr
@@ -23,6 +25,20 @@ namespace vect::expr
         }
 
         [[nodiscard]] constexpr auto size() const -> size_t { return dim; }
+
+        auto loadPacket(size_t idx) const {
+            using T = typename V::valueType;
+            using Traits = detail::SimdTraits<T, dim>;
+            using SrcTraits = detail::SimdTraits<T, V::dim>;
+
+            if constexpr (Traits::available && SrcTraits::available && Traits::width == SrcTraits::width) {
+                auto packet = v_.loadPacket(idx);
+                return detaiL::simdSwizzle<Indices...>(packet);
+            } 
+            else {
+                throw std::runtime_error("Swizzle loadPacket called on incompatible SwizzleOp");
+            }
+        }
     };
 
 }

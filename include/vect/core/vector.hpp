@@ -1,13 +1,9 @@
 #pragma once
 #include "vect/detail/simd_traits.hpp"
 #include <array>
-#include <immintrin.h>
 #include <vect/core/vec_expr.hpp>
 
 #include <bit>
-// TODO: remove iostream include lol
-#include <iostream>
-// TODO: remove immintrin include and define loadPacket in different file
 namespace vect::core
 {
 
@@ -60,8 +56,6 @@ namespace vect::core
                     auto packet = derived.loadPacket(idx);
                     packet.store(&data_[idx]);
                 }
-
-                std::cout << "Hallo!";
             }
 
             for (; idx < N; ++idx)

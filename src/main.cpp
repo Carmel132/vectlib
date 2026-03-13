@@ -13,7 +13,7 @@ void printVector(const vect::core::VecExpr<T> &vec)
 
 int main()
 {
-    vect::Vector<float, 7> v1{1, 2, 3};
+    vect::Vector<float, 4> v1{1, 2, 3};
     vect::Vector<float, 4> v2{1, 0 ,3};
 
     //vect::Vector<double, 3> v3 = v1 * 5.;

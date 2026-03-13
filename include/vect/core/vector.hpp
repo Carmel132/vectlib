@@ -5,7 +5,7 @@
 #include <vect/core/vec_expr.hpp>
 
 #include <bit>
-// WTODO: remove iostream include lol
+// TODO: remove iostream include lol
 #include <iostream>
 // TODO: remove immintrin include and define loadPacket in different file
 namespace vect::core
@@ -50,14 +50,15 @@ namespace vect::core
         Vector<T, N> &operator=(const VecExpr<V> &expr)
         {
             const V &derived = static_cast<const V &>(expr);
+            using Traits = detail::SimdTraits<T, N>;
             size_t idx = 0;
 
-            if constexpr (detail::SimdTraits<T, N>::available)
+            if constexpr (Traits::available)
             {
                 for (; idx <= N - 4; idx += 4)
                 {
                     auto packet = derived.loadPacket(idx);
-                    _mm_store_ps(&data_[idx], packet.reg);
+                    packet.store(&data_[idx]);
                 }
 
                 std::cout << "Hallo!";

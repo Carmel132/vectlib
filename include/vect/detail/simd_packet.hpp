@@ -2,39 +2,15 @@
 #include <immintrin.h>
 #include <type_traits>
 #include <utility>
-
+#include "vect/detail/simd_packet_4f.hpp"
+#include "vect/detail/simd_packet_8f.hpp"
+#include "vect/detail/simd_packet_2d.hpp"
+#include "vect/detail/simd_packet_8i.hpp"
+#include "vect/detail/simd_packet_4i.hpp"
+#include "vect/detail/simd_packet_4d.hpp"
 namespace vect::detail
 {
-  struct Packet4f
-  {
-    __m128 reg;
-
-    void store(float* dest) const 
-    {
-      _mm_store_ps(dest, reg);
-    }
-
-    friend auto operator+(Packet4f a, Packet4f b) -> Packet4f
-    {
-      return {_mm_add_ps(a.reg, b.reg)};
-    }
-    friend auto operator-(Packet4f a, Packet4f b) -> Packet4f
-    {
-      return {_mm_sub_ps(a.reg, b.reg)};
-    }
-    friend auto operator*(Packet4f a, Packet4f b) -> Packet4f
-    {
-      return {_mm_mul_ps(a.reg, b.reg)};
-    }
-    friend auto operator/(Packet4f a, Packet4f b) -> Packet4f
-    {
-      return {_mm_div_ps(a.reg, b.reg)};
-    }
-    friend auto operator-(Packet4f a) -> Packet4f
-    {
-      return {_mm_sub_ps(_mm_setzero_ps(), a.reg)};
-    }
-  };
+  
 
   
 }

@@ -239,4 +239,51 @@ namespace vect::expr {
         });
     }
 
+    template <typename E>
+    requires core::IsVecExpr<E>
+    bool all(const E& expr) {
+        using T = typename E::valueType;
+        using Traits = detail::SimdTraits<T, E::dim>;
+
+        size_t idx = 0;
+        if constexpr (Traits::available) {
+            using Packet = typename Traits::packetType;
+            for (; idx <= E::dim - Traits::width; idx += Traits::width) {
+                Packet packet = expr.loadPacket(idx);
+                
+                using detail::all;
+                if (!all(packet)) return false;
+            }
+        }
+
+        for (; idx < E::dim; ++idx) {
+            if (!expr[idx]) return false;
+        }
+
+        return true;
+    }
+
+    template <typename E>
+    requires core::IsVecExpr<E>
+    bool any(const E& expr) {
+        using T = typename E::valueType;
+        using Traits = detail::SimdTraits<T, E::dim>;
+        size_t idx = 0;
+        if constexpr (Traits::available) {
+            for (; idx <= E::dim - Traits::width; idx += Traits::width) {
+                auto packet = expr.loadPacket(idx);
+
+                using detail::any;
+                if (any(packet)) return true;
+            }
+        }
+
+        for (; idx < E::dim; ++idx) {
+            if (expr[idx]) return true;
+        }
+        
+        return false;
+    }
+
+
 }

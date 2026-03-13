@@ -17,4 +17,10 @@ target_include_directories(vectlib
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME}
-    PRIVATE vectlib)
+    PUBLIC vectlib)
+    
+enable_testing()
+include(CTest)
+if (BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

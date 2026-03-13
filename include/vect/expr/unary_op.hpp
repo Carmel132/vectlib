@@ -33,7 +33,7 @@ namespace vect::expr
 
             detail::Packet4f result;
             for (int j = 0; j < 4; ++j) {
-                result.reg[j] = op_(packet.reg[j]);
+                result.vals[j] = op_(packet.vals[j]);
             }
             return result;
         }

@@ -38,9 +38,18 @@ namespace vect
     using expr::sqrt;
     using expr::sum;
     using expr::tan;
+    using expr::any;
+    using expr::all;
 
     using float2 = core::Vector<float, 2>;
     using float3 = core::Vector<float, 3>;
 
     using float4 = core::Vector<float, 4>;
+    using double2 = core::Vector<double, 2>;
+    using double3 = core::Vector<double, 3>;
+    using double4 = core::Vector<double, 4>;
+    using int2 = core::Vector<int, 2>;
+    using int3 = core::Vector<int, 3>;
+    using int4 = core::Vector<int, 4>;
+    
 }

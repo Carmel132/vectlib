@@ -41,7 +41,7 @@ namespace vect::expr
             _mm_store_ps(lvals, leftPacket.reg);
             _mm_store_ps(rvals, rightPacket.reg);
             for (int j = 0; j < 4; ++j) {
-                result.reg[j] = op_(lvals[j], rvals[j]);
+                result.vals[j] = op_(lvals[j], rvals[j]);
             }
             return result;
         }

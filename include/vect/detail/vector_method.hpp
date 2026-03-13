@@ -20,4 +20,10 @@ namespace vect::detail
     {
         return ((l[Is] == r[Is]) && ...);
     }
+
+    template <typename V>
+    inline bool all(const V& v) {return static_cast<bool>(v);}
+
+    template <typename V>
+    inline bool any(const V& v) {return static_cast<bool>(v);}
 }

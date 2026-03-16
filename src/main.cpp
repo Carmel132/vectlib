@@ -22,7 +22,7 @@ auto main() -> int
 
     // auto v3 = vect::cross(vect::Vector<double, 3>{1, 2}, vect::Vector<double, 3>{1, 0});
     // v1 = v1 + v2;
-    v1 = -v1;
+    v1 = -v1.swizzle<2, 0, 1, 3>() * 2.f + v2.swizzle<2, 0, 1, 3>() * 3.f;
     // std::print("Should be equal: {}, should not (different): {}, should not (size): {}", v1==v2, vect::sin(v1) == v2, v1.swizzle<2, 0>() == v2);
     // std::println("Sum: {}", );
     std::cout << v1 << "\n"

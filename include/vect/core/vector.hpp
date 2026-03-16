@@ -1,7 +1,9 @@
 #pragma once
 #include "vect/detail/simd_traits.hpp"
+#include "vect/detail/simd_resolver.hpp"
 #include <array>
 #include <vect/core/vec_expr.hpp>
+
 
 #include <bit>
 namespace vect::core
@@ -46,7 +48,8 @@ namespace vect::core
         Vector<T, N> &operator=(const VecExpr<V> &expr)
         {
             const V &derived = static_cast<const V &>(expr);
-            using Traits = detail::SimdTraits<T, N>;
+            using R = detail::SimdResolver<V>;
+            using Traits = detail::SimdTraits<typename R::valueType, R::dim>;
             size_t idx = 0;
 
             if constexpr (Traits::available)

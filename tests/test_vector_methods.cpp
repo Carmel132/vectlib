@@ -253,6 +253,14 @@ TEST(VectorSwizzleTest, BasicSwizzle) {
     EXPECT_FLOAT_EQ(sw_op[1], 8.0f);  // 4*2
     EXPECT_FLOAT_EQ(sw_op[2], 2.0f);  // 1*2
     EXPECT_FLOAT_EQ(sw_op[3], 4.0f);  // 2*2
+
+    // Test swizzle on int4
+    int4 vi{1, 2, 3, 4};
+    auto swi = vi.swizzle<3,2,1,0>();
+    EXPECT_EQ(swi[0], 4);
+    EXPECT_EQ(swi[1], 3);
+    EXPECT_EQ(swi[2], 2);
+    EXPECT_EQ(swi[3], 1);
 }
 
 template <typename T, size_t N>

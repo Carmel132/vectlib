@@ -1,6 +1,6 @@
 #pragma once
 #include <type_traits>
-
+#include "vect/core/vector.hpp"
 namespace vect::core {
     template <typename T>
     struct IsLeaf : std::false_type {};

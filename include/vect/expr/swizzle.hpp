@@ -1,10 +1,10 @@
 #pragma once
 
-#include "vect/core/vector.hpp"
 #include "vect/core/vec_expr.hpp"
 #include "vect/expr/capture_strategy.hpp"
 
 #include "vect/detail/simd_traits.hpp"
+#include "vect/detail/simd_swizzle.hpp"
 
 #include <array>
 
@@ -33,7 +33,7 @@ namespace vect::expr
 
             if constexpr (Traits::available && SrcTraits::available && Traits::width == SrcTraits::width) {
                 auto packet = v_.loadPacket(idx);
-                return detaiL::simdSwizzle<Indices...>(packet);
+                return detail::simdSwizzle<Indices...>(packet);
             } 
             else {
                 throw std::runtime_error("Swizzle loadPacket called on incompatible SwizzleOp");

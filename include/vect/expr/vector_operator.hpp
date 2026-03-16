@@ -32,7 +32,7 @@ namespace vect::core {
 
     template <IsVecExpr V, Scalar S>
     auto operator*(const V& v, S s) {
-        using ScalarExpr = VecScalar<S>;
+        using ScalarExpr = VecScalar<S, V::dim>;
         return expr::BinaryOp<V, ScalarExpr, std::multiplies<>>(v, ScalarExpr(s));
     }
 
@@ -43,7 +43,7 @@ namespace vect::core {
 
     template <IsVecExpr V, Scalar S>
     auto operator/(const V& v, S s) {
-        using ScalarExpr = VecScalar<S>;
+        using ScalarExpr = VecScalar<S, V::dim>;
         return expr::BinaryOp<V, ScalarExpr, std::divides<>>(v, ScalarExpr(s));
     }
 

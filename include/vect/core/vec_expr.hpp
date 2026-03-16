@@ -33,6 +33,10 @@ namespace vect::core {
             return static_cast<const Derived*>(this)->loadPacket(idx);
         }
 
+        constexpr auto loadPacketUnaligned(size_t idx) const {
+            return static_cast<const Derived*>(this)->loadPacketUnaligned(idx);
+        }
+
     };
 
 

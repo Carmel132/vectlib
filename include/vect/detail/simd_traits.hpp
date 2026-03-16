@@ -19,6 +19,7 @@ namespace vect::detail
     {
 
         static constexpr bool available = false;
+        static constexpr bool isAligned = false;
         using packetType = T;
         static constexpr size_t width = 1;
         static constexpr size_t alignment = alignof(T);
@@ -46,6 +47,7 @@ namespace vect::detail
         ;
         static constexpr size_t scalarAlign = std::bit_ceil(sizeof(float) * N);
         static constexpr size_t alignment = (scalarAlign > simdAlign) ? simdAlign : scalarAlign;
+        static constexpr bool isAligned = false;
     };
 
     template <size_t N>
@@ -65,6 +67,7 @@ namespace vect::detail
 
         static constexpr size_t scalarAlign = std::bit_ceil(sizeof(double) * N);
         static constexpr size_t alignment = (scalarAlign > simdAlign) ? simdAlign : scalarAlign;
+        static constexpr bool isAligned = false;
     };
 
     template <size_t N>
@@ -84,5 +87,6 @@ namespace vect::detail
 
         static constexpr size_t scalarAlign = std::bit_ceil(sizeof(int) * N);
         static constexpr size_t alignment = (scalarAlign > simdAlign) ? simdAlign : scalarAlign;
+        static constexpr bool isAligned = false;
     };
 }

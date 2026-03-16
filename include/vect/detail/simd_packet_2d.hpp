@@ -13,6 +13,21 @@ namespace vect::detail {
             _mm_store_pd(dest, reg);
         }
 
+        void storeUnaligned(double* dest) const {
+            _mm_storeu_pd(dest, reg);
+        }
+
+        static Packet2d load(const double* src) {
+            return {_mm_load_pd(src)};
+        }
+        static Packet2d loadUnaligned(const double* src) {
+            return {_mm_loadu_pd(src)};
+        }
+
+        static Packet2d broadcast(double val) {
+            return {_mm_set1_pd(val)};
+        }
+
         friend auto operator+(Packet2d a, Packet2d b) -> Packet2d
         {
             return {_mm_add_pd(a.reg, b.reg)};

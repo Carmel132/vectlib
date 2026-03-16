@@ -10,7 +10,7 @@ namespace vect::core
 {
 
     template <typename T, size_t N>
-    class Vector : public VecExpr<Vector<T, N>>
+    class alignas(detail::SimdTraits<T, N>::alignment) Vector : public VecExpr<Vector<T, N>>
     {
     public:
         
@@ -54,10 +54,15 @@ namespace vect::core
 
             if constexpr (Traits::available)
             {
-                for (; idx <= N - 4; idx += 4)
+                for (; idx <= N - Traits::width; idx += Traits::width)
                 {
-                    auto packet = derived.loadPacket(idx);
-                    packet.store(&data_[idx]);
+                    if constexpr (R::isAligned) {
+                        auto packet = derived.loadPacket(idx);
+                        packet.store(&data_[idx]);
+                    } else {
+                        auto packet = derived.loadPacketUnaligned(idx);
+                        packet.storeUnaligned(&data_[idx]);
+                    }
                 }
             }
 
@@ -71,7 +76,13 @@ namespace vect::core
 
         auto loadPacket(size_t idx) const
         {
-            return detail::Packet4f{_mm_load_ps(&data_[idx])};
+            using Packet = typename detail::SimdTraits<T, N>::packetType;
+            return Packet::load(&data_[idx]);
+        }
+
+        auto loadPacketUnaligned(size_t idx) const {
+            using Packet = typename detail::SimdTraits<T, N>::packetType;
+            return Packet::loadUnaligned(&data_[idx]);
         }
 
     private:

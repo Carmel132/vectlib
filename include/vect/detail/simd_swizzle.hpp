@@ -11,12 +11,7 @@ namespace vect::detail
 
         constexpr size_t indices[] = {Is...};
 
-        auto mask = _MM_SHUFFLE(
-            indices[3],
-            indices[2],
-            indices[1],
-            indices[0]);
-        return {_mm_shuffle_ps(packet.reg, packet.reg, mask)};
+        return { _mm_shuffle_ps(packet.reg, packet.reg, _MM_SHUFFLE(indices[3], indices[2], indices[1], indices[0])) };
     }
 
     template <size_t... Is>

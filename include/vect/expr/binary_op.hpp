@@ -31,19 +31,41 @@ namespace vect::expr
             auto leftPacket = l_.loadPacket(idx);
             auto rightPacket = r_.loadPacket(idx);
 
-            if constexpr (requires {op_(leftPacket, rightPacket); }) {
-                return op_(leftPacket, rightPacket);
-            }
+            return applyOp(leftPacket, rightPacket);
+        }
 
-            alignas(16)float lvals[4];
-            alignas(16)float rvals[4];
-            detail::Packet4f result;
-            _mm_store_ps(lvals, leftPacket.reg);
-            _mm_store_ps(rvals, rightPacket.reg);
-            for (int j = 0; j < 4; ++j) {
-                result.vals[j] = op_(lvals[j], rvals[j]);
+        auto loadPacketUnaligned(size_t idx) const
+        {
+            auto leftPacket = l_.loadPacketUnaligned(idx);
+            auto rightPacket = r_.loadPacketUnaligned(idx);
+
+            return applyOp(leftPacket, rightPacket);
+        }
+
+        private:
+        template <typename P>
+        auto applyOp(const P& leftPacket, const P& rightPacket) const {
+        
+            if constexpr (requires {op_(leftPacket, rightPacket);}) {
+                return op_(leftPacket, rightPacket);
+            } else {
+                using T = typename L::valueType;
+                using Traits = detail::SimdTraits<T, L::dim>;
+                constexpr size_t width = Traits::width;
+                alignas(Traits::alignment) T lvals[width];
+                alignas(Traits::alignment) T rvals[width];
+                alignas(Traits::alignment) T res[width];
+
+                leftPacket.store(lvals);
+                rightPacket.store(rvals);
+
+                for (size_t idx{}; idx < width; ++idx) {
+                    res[idx] = op_(lvals[idx], rvals[idx]);
+                }
+
+                return P::load(res);
             }
-            return result;
+        
         }
     };
 }

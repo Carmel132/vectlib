@@ -14,6 +14,22 @@ namespace vect::detail
     {
         _mm256_store_si256((__m256i*)dest, reg);
     }
+    void storeUnaligned(int* dest) const 
+    {
+        _mm256_storeu_si256((__m256i*)dest, reg);
+    }
+
+    static Packet8i load(const int* src) {
+        return {_mm256_load_si256((__m256i*)src)};
+    }
+    static Packet8i loadUnaligned(const int* src) {
+        return {_mm256_loadu_si256((__m256i*)src)};
+    }
+
+    static Packet8i broadcast(int val) {
+        return {_mm256_set1_epi32(val)};
+    }
+
     friend auto operator+(Packet8i a, Packet8i b) -> Packet8i
     {
         return {_mm256_add_epi32(a.reg, b.reg)};

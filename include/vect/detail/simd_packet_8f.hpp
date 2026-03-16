@@ -18,6 +18,20 @@ namespace vect::detail
         {
             _mm256_store_ps(dest, reg);
         }
+        void storeUnaligned(float* dest) const {
+            _mm256_storeu_ps(dest, reg);
+        }
+
+        static Packet8f load(const float* src) {
+            return Packet8f{_mm256_load_ps(src)};
+        }
+        static Packet8f loadUnaligned(const float* src) {
+            return Packet8f{_mm256_loadu_ps(src)};
+        }
+
+        static Packet8f broadcast(float val) {
+            return Packet8f{_mm256_set1_ps(val)};
+        }
 
         friend auto operator+(Packet8f a, Packet8f b) -> Packet8f
         {

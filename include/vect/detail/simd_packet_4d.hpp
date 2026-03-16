@@ -12,6 +12,21 @@ namespace vect::detail
         {
             _mm256_store_pd(dest, reg);
         }
+        void storeUnaligned(double* dest) const {
+            _mm256_storeu_pd(dest, reg);
+        }
+
+        static Packet4d load(const double* src) {
+            return {_mm256_load_pd(src)};
+        }
+        static Packet4d loadUnaligned(const double* src) {
+            return {_mm256_loadu_pd(src)};
+        }
+
+        static Packet4d broadcast(double val) {
+            return {_mm256_set1_pd(val)};
+        }
+
         friend auto operator+(Packet4d a, Packet4d b) -> Packet4d
         {
             return {_mm256_add_pd(a.reg, b.reg)};

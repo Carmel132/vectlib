@@ -217,44 +217,44 @@ TEST(SimdTraitsTest, VectorAlignment) {
 }
 
 TEST(VectorSwizzleTest, BasicSwizzle) {
-    // Test swizzle on SIMD-accelerated float4
+
     float4 v{1.0f, 2.0f, 3.0f, 4.0f};
 
-    // Identity swizzle
+
     auto sw_identity = v.swizzle<0,1,2,3>();
     EXPECT_FLOAT_EQ(sw_identity[0], 1.0f);
     EXPECT_FLOAT_EQ(sw_identity[1], 2.0f);
     EXPECT_FLOAT_EQ(sw_identity[2], 3.0f);
     EXPECT_FLOAT_EQ(sw_identity[3], 4.0f);
 
-    // Reorder components
+
     auto sw_reorder = v.swizzle<1,0,3,2>();
     EXPECT_FLOAT_EQ(sw_reorder[0], 2.0f);
     EXPECT_FLOAT_EQ(sw_reorder[1], 1.0f);
     EXPECT_FLOAT_EQ(sw_reorder[2], 4.0f);
     EXPECT_FLOAT_EQ(sw_reorder[3], 3.0f);
 
-    // Duplicate components
+
     auto sw_dup = v.swizzle<0,0,1,1>();
     EXPECT_FLOAT_EQ(sw_dup[0], 1.0f);
     EXPECT_FLOAT_EQ(sw_dup[1], 1.0f);
     EXPECT_FLOAT_EQ(sw_dup[2], 2.0f);
     EXPECT_FLOAT_EQ(sw_dup[3], 2.0f);
 
-    // Test on smaller vector (float2, not SIMD-accelerated)
+
     float2 v2{5.0f, 6.0f};
     auto sw2 = v2.swizzle<1,0>();
     EXPECT_FLOAT_EQ(sw2[0], 6.0f);
     EXPECT_FLOAT_EQ(sw2[1], 5.0f);
 
-    // Test swizzle with operations (expression template)
-    auto sw_op = (v * 2.0f).swizzle<2,3,0,1>();
-    EXPECT_FLOAT_EQ(sw_op[0], 6.0f);  // 3*2
-    EXPECT_FLOAT_EQ(sw_op[1], 8.0f);  // 4*2
-    EXPECT_FLOAT_EQ(sw_op[2], 2.0f);  // 1*2
-    EXPECT_FLOAT_EQ(sw_op[3], 4.0f);  // 2*2
 
-    // Test swizzle on int4
+    auto sw_op = (v * 2.0f).swizzle<2,3,0,1>();
+    EXPECT_FLOAT_EQ(sw_op[0], 6.0f);
+    EXPECT_FLOAT_EQ(sw_op[1], 8.0f);
+    EXPECT_FLOAT_EQ(sw_op[2], 2.0f);
+    EXPECT_FLOAT_EQ(sw_op[3], 4.0f);
+
+
     int4 vi{1, 2, 3, 4};
     auto swi = vi.swizzle<3,2,1,0>();
     EXPECT_EQ(swi[0], 4);
@@ -303,4 +303,129 @@ TEST(SimdTraitsTest, IntVariants) {
     ValidateSimdTraits<int, 3>();
     ValidateSimdTraits<int, 4>();
     ValidateSimdTraits<int, 8>();
+}
+
+TEST(UnalignedSimdTest, UnalignedLoadPacket) {
+
+    float4 v{1.0f, 2.0f, 3.0f, 4.0f};
+    
+
+    auto aligned_packet = v.loadPacket(0);
+    EXPECT_FLOAT_EQ(aligned_packet.vals[0], 1.0f);
+    EXPECT_FLOAT_EQ(aligned_packet.vals[1], 2.0f);
+    EXPECT_FLOAT_EQ(aligned_packet.vals[2], 3.0f);
+    EXPECT_FLOAT_EQ(aligned_packet.vals[3], 4.0f);    auto unaligned_packet = v.loadPacketUnaligned(0);
+    EXPECT_FLOAT_EQ(unaligned_packet.vals[0], 1.0f);
+    EXPECT_FLOAT_EQ(unaligned_packet.vals[1], 2.0f);
+    EXPECT_FLOAT_EQ(unaligned_packet.vals[2], 3.0f);
+    EXPECT_FLOAT_EQ(unaligned_packet.vals[3], 4.0f);
+}
+
+TEST(UnalignedSimdTest, UnalignedStorePacket) {    float data[8] = {0};
+    float4 v{5.0f, 6.0f, 7.0f, 8.0f};    auto packet = v.loadPacket(0);
+    packet.store(&data[0]);
+    EXPECT_FLOAT_EQ(data[0], 5.0f);
+    EXPECT_FLOAT_EQ(data[1], 6.0f);
+    EXPECT_FLOAT_EQ(data[2], 7.0f);
+    EXPECT_FLOAT_EQ(data[3], 8.0f);    for (int i = 0; i < 8; ++i) data[i] = 0;
+    packet.storeUnaligned(&data[0]);
+    EXPECT_FLOAT_EQ(data[0], 5.0f);
+    EXPECT_FLOAT_EQ(data[1], 6.0f);
+    EXPECT_FLOAT_EQ(data[2], 7.0f);
+    EXPECT_FLOAT_EQ(data[3], 8.0f);
+}
+
+TEST(UnalignedSimdTest, UnalignedArithmetic) {
+    float4 a{1.0f, 2.0f, 3.0f, 4.0f};
+    float4 b{5.0f, 6.0f, 7.0f, 8.0f};
+
+    auto result = a + b;
+    EXPECT_FLOAT_EQ(result[0], 6.0f);
+    EXPECT_FLOAT_EQ(result[1], 8.0f);
+    EXPECT_FLOAT_EQ(result[2], 10.0f);
+    EXPECT_FLOAT_EQ(result[3], 12.0f);
+
+    float4 c = a + b;  
+    EXPECT_FLOAT_EQ(c[0], 6.0f);
+    EXPECT_FLOAT_EQ(c[1], 8.0f);
+    EXPECT_FLOAT_EQ(c[2], 10.0f);
+    EXPECT_FLOAT_EQ(c[3], 12.0f);
+}
+
+TEST(UnalignedSimdTest, UnalignedSwizzleOperations) {
+    float4 v{1.0f, 2.0f, 3.0f, 4.0f};
+
+    auto swizzled = v.swizzle<3,2,1,0>();
+    float4 result = swizzled;
+    EXPECT_FLOAT_EQ(result[0], 4.0f);
+    EXPECT_FLOAT_EQ(result[1], 3.0f);
+    EXPECT_FLOAT_EQ(result[2], 2.0f);
+    EXPECT_FLOAT_EQ(result[3], 1.0f);
+
+    auto expr_swizzle = (v + v).swizzle<2,0,3,1>();
+    float4 result2 = expr_swizzle;
+    EXPECT_FLOAT_EQ(result2[0], 6.0f);
+    EXPECT_FLOAT_EQ(result2[1], 2.0f);
+    EXPECT_FLOAT_EQ(result2[2], 8.0f);
+    EXPECT_FLOAT_EQ(result2[3], 4.0f);
+}
+
+TEST(UnalignedSimdTest, UnalignedDotProduct) {
+    float4 x{1.0f, 0.0f, 0.0f, 0.0f};
+    float4 y{0.0f, 1.0f, 0.0f, 0.0f};
+    float4 z{2.0f, 3.0f, 4.0f, 5.0f};
+
+    EXPECT_FLOAT_EQ(dot(x, y), 0.0f);
+    EXPECT_FLOAT_EQ(dot(x, z), 2.0f);
+    EXPECT_FLOAT_EQ(dot(y, z), 3.0f);
+}
+
+TEST(UnalignedSimdTest, UnalignedElementwiseOps) {
+    float4 v{1.0f, 4.0f, 9.0f, 16.0f};
+
+    auto sq_root = sqrt(v);
+    EXPECT_NEAR(sq_root[0], 1.0f, kEps);
+    EXPECT_NEAR(sq_root[1], 2.0f, kEps);
+    EXPECT_NEAR(sq_root[2], 3.0f, kEps);
+    EXPECT_NEAR(sq_root[3], 4.0f, kEps);
+
+    auto abs_v = abs(v);
+    EXPECT_FLOAT_EQ(abs_v[0], 1.0f);
+    EXPECT_FLOAT_EQ(abs_v[1], 4.0f);
+    EXPECT_FLOAT_EQ(abs_v[2], 9.0f);
+    EXPECT_FLOAT_EQ(abs_v[3], 16.0f);
+}
+
+TEST(UnalignedSimdTest, UnalignedIntPacket) {
+    int4 a{1, 2, 3, 4};
+    int4 b{5, 6, 7, 8};
+
+    auto packet_a = a.loadPacketUnaligned(0);
+    int data[4] = {0};
+    packet_a.storeUnaligned(data);
+    EXPECT_EQ(data[0], 1);
+    EXPECT_EQ(data[1], 2);
+    EXPECT_EQ(data[2], 3);
+    EXPECT_EQ(data[3], 4);
+
+    auto sum = a + b;
+    EXPECT_EQ(sum[0], 6);
+    EXPECT_EQ(sum[1], 8);
+    EXPECT_EQ(sum[2], 10);
+    EXPECT_EQ(sum[3], 12);
+}
+
+TEST(UnalignedSimdTest, UnalignedDoublePacket) {
+    double2 a{1.5, 2.5};
+    double2 b{3.5, 4.5};
+
+    auto sum = a + b;
+    EXPECT_DOUBLE_EQ(sum[0], 5.0);
+    EXPECT_DOUBLE_EQ(sum[1], 7.0);
+
+    auto packet = a.loadPacketUnaligned(0);
+    double data[2] = {0};
+    packet.storeUnaligned(data);
+    EXPECT_DOUBLE_EQ(data[0], 1.5);
+    EXPECT_DOUBLE_EQ(data[1], 2.5);
 }

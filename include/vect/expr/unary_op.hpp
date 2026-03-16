@@ -25,17 +25,34 @@ namespace vect::expr
         [[nodiscard]] constexpr auto size() const -> size_t{ return v_.size(); }
 
         auto loadPacket(size_t idx) const {
-            auto packet = v_.loadPacket(idx);
+            return applyOp(v_.loadPacket(idx));
+        }
 
+        auto loadPacketUnaligned(size_t idx) const {
+            return applyOp(v_.loadPacketUnaligned(idx));
+        }
+
+        private:
+        template <typename P>
+        auto applyOp(const P& packet) const {
             if constexpr (requires {op_(packet); }) {
                 return op_(packet);
-            }
+            } else {
+                using T = typename V::valueType;
+                using Traits = detail::SimdTraits<T, V::dim>;
+                constexpr size_t width = Traits::width;
+                alignas(Traits::alignment) T vals[width];
+                alignas(Traits::alignment) T res[width];
 
-            detail::Packet4f result;
-            for (int j = 0; j < 4; ++j) {
-                result.vals[j] = op_(packet.vals[j]);
+                packet.store(vals);
+
+                for (size_t j = 0; j < width; ++j) {
+                    res[j] = op_(vals[j]);
+                }
+
+                return P::load(res);
             }
-            return result;
+            
         }
     };
 }

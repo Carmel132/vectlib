@@ -27,17 +27,13 @@ namespace vect::expr
         [[nodiscard]] constexpr auto size() const -> size_t { return dim; }
 
         auto loadPacket(size_t idx) const {
-            using T = typename V::valueType;
-            using Traits = detail::SimdTraits<T, dim>;
-            using SrcTraits = detail::SimdTraits<T, V::dim>;
+            auto packet = v_.loadPacket(idx);
+            return detail::simdSwizzle<Indices...>(packet);
+        }
 
-            if constexpr (Traits::available && SrcTraits::available && Traits::width == SrcTraits::width) {
-                auto packet = v_.loadPacket(idx);
-                return detail::simdSwizzle<Indices...>(packet);
-            } 
-            else {
-                throw std::runtime_error("Swizzle loadPacket called on incompatible SwizzleOp");
-            }
+        auto loadPacketUnaligned(size_t idx) const {
+            auto packet = v_.loadPacketUnaligned(idx);
+            return detail::simdSwizzle<Indices...>(packet);
         }
     };
 

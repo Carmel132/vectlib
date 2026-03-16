@@ -15,6 +15,16 @@ namespace vect::detail
         {
             _mm_store_ps(dest, reg);
         }
+        void storeUnaligned(float* dest) const {
+            _mm_storeu_ps(dest, reg);
+        }
+
+        static Packet4f load(const float* src) {
+            return {_mm_load_ps(src)};
+        }
+        static Packet4f loadUnaligned(const float* src) {
+            return {_mm_loadu_ps(src)};
+        }
 
         friend auto operator+(Packet4f a, Packet4f b) -> Packet4f
         {
@@ -35,6 +45,10 @@ namespace vect::detail
         friend auto operator-(Packet4f a) -> Packet4f
         {
             return {_mm_sub_ps(_mm_setzero_ps(), a.reg)};
+        }
+
+        static Packet4f broadcast(float val) {
+            return {_mm_set1_ps(val)};
         }
     };
 

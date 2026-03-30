@@ -1,12 +1,12 @@
 #pragma once
 #include "vect/detail/simd_mask.hpp"
-
+#include "vect/detail/simd_reduction.hpp"
 namespace vect::detail
 {
     struct ComparisonGreater
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a > b; }
+        template <typename A, typename B>
+        auto operator()(A a, B b) const { return a > b; }
 
         auto operator()(Packet4f a, Packet4f b) const -> Mask4f
         {
@@ -41,8 +41,8 @@ namespace vect::detail
 
     struct ComparisonLess
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a < b; }
+        template <typename A, typename B>
+        auto operator()(A a, B b) const { return a < b; }
 
         auto operator()(Packet4f a, Packet4f b) const -> Mask4f
         {
@@ -77,8 +77,8 @@ namespace vect::detail
 
     struct ComparisonGreaterEqual
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a >= b; }
+        template <typename A, typename B>
+        auto operator()(A a, B b) const { return a >= b; }
 
         auto operator()(Packet4f a, Packet4f b) const -> Mask4f
         {
@@ -115,8 +115,8 @@ namespace vect::detail
 
     struct ComparisonLessEqual
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a <= b; }
+        template <typename A, typename B>
+        auto operator()(A a, B b) const { return a <= b; }
 
         auto operator()(Packet4f a, Packet4f b) const -> Mask4f
         {
@@ -153,8 +153,8 @@ namespace vect::detail
 
     struct ComparisonEqual
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a == b; }
+        template <typename A, typename B>
+        auto operator()(A a, B b) const { return a == b; }
 
         auto operator()(Packet4f a, Packet4f b) const -> Mask4f
         {
@@ -189,8 +189,8 @@ namespace vect::detail
 
     struct ComparisonNotEqual
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a != b; }
+        template <typename A, typename B>
+        auto operator()(A a, B b) const { return a != b; }
 
         auto operator()(Packet4f a, Packet4f b) const -> Mask4f
         {
@@ -227,8 +227,9 @@ namespace vect::detail
 
     struct LogicalAnd
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a && b; }
+        template <typename A, typename B>
+        requires std::is_arithmetic_v<A> && std::is_arithmetic_v<B>
+        auto operator()(A a, B b) const { return a && b; }
 
         auto operator()(Mask4f a, Mask4f b) const -> Mask4f
         {
@@ -259,12 +260,28 @@ namespace vect::detail
         {
             return Mask8i::fromReg(_mm256_and_si256(a.reg, b.reg));
         }
+
+        template <typename L, typename R>
+        auto operator()(L l, R r) const {
+            auto lMask = [&]() {
+                if constexpr (isMask_v<L>) return l;
+                else return simdIsNonzero(l);
+            }();
+
+            auto rMask = [&]() {
+                if constexpr (isMask_v<R>) return r;
+                else return simdIsNonzero(r);
+            }();
+
+            return (*this)(lMask, rMask);
+        }
     };
 
     struct LogicalOr
     {
-        template <typename T>
-        auto operator()(T a, T b) const { return a || b; }
+        template <typename A, typename B>
+        requires std::is_arithmetic_v<A> && std::is_arithmetic_v<B>
+        auto operator()(A a, B b) const { return a || b; }
 
         auto operator()(Mask4f a, Mask4f b) const -> Mask4f
         {

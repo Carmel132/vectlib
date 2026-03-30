@@ -186,4 +186,19 @@ namespace vect::core
         using ScalarExpr = VecScalar<L, R::dim>;
         return expr::BinaryOp<ScalarExpr, R, detail::ComparisonLessEqual>(ScalarExpr(l), r);
     }
+
+    template <IsVecExpr L, IsVecExpr R>
+    auto operator&&(const L& l, const R& r) {
+        return expr::BinaryOp<L, R, detail::LogicalAnd>(l, r);
+    }
+
+    template <IsVecExpr L, IsVecExpr R>
+    auto operator||(const L& l, const R& r) {
+        return expr::BinaryOp<L, R, detail::LogicalOr>(l, r);
+    }
+
+    template <IsVecExpr V>
+    auto operator!(const V& v) {
+        return expr::UnaryOp<V, detail::LogicalNot>(v);
+    }
 }

@@ -26,14 +26,15 @@ namespace vect::core
         {
         }
 
-        constexpr Vector(std::initializer_list<T> list)
+        template <typename U>
+        constexpr Vector(std::initializer_list<U> list)
         {
             size_t i = 0;
             for (const auto &val : list)
             {
                 if (i >= N)
                     break;
-                data_[i++] = val;
+                data_[i++] = static_cast<T>(val);
             }
         }
 

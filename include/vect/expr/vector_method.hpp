@@ -286,7 +286,7 @@ namespace vect::expr
             for (; i <= V::dim - Traits::width; i += Traits::width) {
                 auto packet = derived.loadPacketUnaligned(i);
 
-                if constexpr (detail::is_mask_v<decltype(packet)>) {
+                if constexpr (detail::isMask_v<decltype(packet)>) {
                     if (!detail::simdAllFull(packet)) return false;
                 } else {
                     auto mask = detail::simdIsNonzero(packet);
@@ -313,7 +313,7 @@ namespace vect::expr
         if constexpr (Traits::available) {
             for (; i <= V::dim - Traits::width; i += Traits::width) {
                 auto packet = derived.loadPacketUnaligned(i);
-                if constexpr (detail::is_mask_v<decltype(packet)>) {
+                if constexpr (detail::isMask_v<decltype(packet)>) {
                     if (detail::simdAnyFull(packet)) return true;
                 } else {
                      auto mask = detail::simdIsNonzero(packet);

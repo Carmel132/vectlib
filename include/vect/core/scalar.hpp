@@ -16,7 +16,7 @@ namespace vect::core
         static constexpr size_t dim = N; // size agnostic
         using valueType = T;
 
-        explicit VecScalar(T v) : val_{v} {}
+        template <typename U> requires std::is_arithmetic_v<U> explicit VecScalar(U v) : val_{static_cast<T>(v)} {}
         auto operator[](size_t idx) const -> T { return val_; }
         [[nodiscard]] auto size() const -> size_t { return 0; }
 

@@ -68,6 +68,7 @@ TEST(VectorOperatorsTest, ArithmeticAndComparison) {
     EXPECT_EQ(oss.str(), "[1  -2  3  -4]");
 }
 
+
 TEST(VectorMethodsTest, DotCrossAndNorm) {
     float4 x{1.0f, 0.0f, 0.0f, 0.0f};
     float4 y{0.0f, 1.0f, 0.0f, 0.0f};
@@ -176,6 +177,68 @@ TEST(VectorMethodsTest, Map) {
     auto squared = map(v, [](float x) { return x * x; });
     EXPECT_FLOAT_EQ(squared[0], 1.0f);
     EXPECT_FLOAT_EQ(squared[2], 9.0f);
+}
+
+TEST(VectorMethodsTest, WhereOp) {
+    float4 mask{1.0f, 0.0f, 1.0f, 0.0f};
+    float4 true_vals{10.0f, 20.0f, 30.0f, 40.0f};
+    float4 false_vals{100.0f, 200.0f, 300.0f, 400.0f};
+    
+    auto result = where(mask, true_vals, false_vals);
+    EXPECT_FLOAT_EQ(result[0], 10.0f);  
+    EXPECT_FLOAT_EQ(result[1], 200.0f); 
+    EXPECT_FLOAT_EQ(result[2], 30.0f);  
+    EXPECT_FLOAT_EQ(result[3], 400.0f); 
+    
+    
+    float4 a{1.0f, 5.0f, 3.0f, 7.0f};
+    float4 b{2.0f, 4.0f, 3.0f, 8.0f};
+    auto where_result = where(a > b, a, b);
+    EXPECT_FLOAT_EQ(where_result[0], 2.0f); 
+    EXPECT_FLOAT_EQ(where_result[1], 5.0f); 
+    EXPECT_FLOAT_EQ(where_result[2], 3.0f); 
+    EXPECT_FLOAT_EQ(where_result[3], 8.0f); 
+}
+
+TEST(VectorMethodsTest, ReductionAllAny) {
+    
+    float4 all_true{1.0f, 2.0f, 3.0f, 4.0f};
+    float4 has_false{1.0f, 0.0f, 3.0f, 4.0f};
+    float4 all_false{0.0f, 0.0f, 0.0f, 0.0f};
+    
+    EXPECT_TRUE(all(all_true));
+    EXPECT_FALSE(all(has_false));
+    EXPECT_FALSE(all(all_false));
+    
+    
+    EXPECT_TRUE(any(all_true));
+    EXPECT_TRUE(any(has_false));
+    EXPECT_FALSE(any(all_false));
+    
+    
+    float4 a{1.0f, 2.0f, 3.0f, 4.0f};
+    float4 b{0.5f, 2.5f, 3.0f, 5.0f};
+    
+    auto gt_mask = a > b; 
+    EXPECT_FALSE(all(gt_mask));
+    EXPECT_TRUE(any(gt_mask));
+    
+    auto eq_mask = a == a; 
+    EXPECT_TRUE(all(eq_mask));
+    EXPECT_TRUE(any(eq_mask));
+    
+    auto ne_mask = a != a; 
+    EXPECT_FALSE(all(ne_mask));
+    EXPECT_FALSE(any(ne_mask));
+    
+    
+    int4 int_vec{1, 0, 1, 0};
+    EXPECT_FALSE(all(int_vec));
+    EXPECT_TRUE(any(int_vec));
+    
+    double2 double_vec{1.0, 0.0};
+    EXPECT_FALSE(all(double_vec));
+    EXPECT_TRUE(any(double_vec));
 }
 
 TEST(VectorMethodsTest, NormalizeZeroLength) {

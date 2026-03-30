@@ -44,4 +44,14 @@ namespace vect::detail
 
         static auto fromReg(__m256i r) -> Mask8i { return {r}; }
     };
+
+    template <typename T> struct is_mask : std::false_type {};
+    template <> struct is_mask<Mask4f> : std::true_type {};
+    template <> struct is_mask<Mask8f> : std::true_type {};
+    template <> struct is_mask<Mask2d> : std::true_type {};
+    template <> struct is_mask<Mask4d> : std::true_type {};
+    template <> struct is_mask<Mask4i> : std::true_type {};
+    template <> struct is_mask<Mask8i> : std::true_type {};
+
+    template <typename T> inline constexpr bool is_mask_v = is_mask<T>::value;
 }

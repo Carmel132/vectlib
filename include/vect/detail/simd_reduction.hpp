@@ -1,9 +1,34 @@
 #pragma once
 
-
+#include "vect/detail/simd_packet.hpp"
 #include "vect/detail/simd_mask.hpp"
 
 namespace vect::detail {
+
+    inline Mask4f simdIsNonzero(Packet4f p) {
+        return Mask4f(_mm_cmpneq_ps(p.reg, _mm_setzero_ps()));
+    }
+
+    inline Mask8f simdIsNonzero(Packet8f p) {
+        return Mask8f(_mm256_cmp_ps(p.reg, _mm256_setzero_ps(), _CMP_NEQ_OQ));
+    }
+
+    inline Mask2d simdIsNonzero(Packet2d p) {
+        return Mask2d(_mm_cmpneq_pd(p.reg, _mm_setzero_pd()));
+    }
+
+    inline Mask4d simdIsNonzero(Packet4d p) {
+        return Mask4d(_mm256_cmp_pd(p.reg, _mm256_setzero_pd(), _CMP_NEQ_OQ));
+    }
+
+    inline Mask4i simdIsNonzero(Packet4i p) {
+        return Mask4i(_mm_xor_si128(_mm_cmpeq_epi32(p.reg, _mm_setzero_si128()), _mm_set1_epi32(-1)));
+    }
+
+    inline Mask8i simdIsNonzero(Packet8i p) {
+        return Mask8i(_mm256_xor_si256(_mm256_cmpeq_epi32(p.reg, _mm256_setzero_si256()), _mm256_set1_epi32(-1)));
+    }
+
     inline bool simdAllFull(Mask4f m) {
         return _mm_movemask_ps(m.reg) == 0xF;
     }

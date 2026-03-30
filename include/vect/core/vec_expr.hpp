@@ -2,6 +2,8 @@
 #include <cmath>
 #include <cstddef>
 #include <utility>
+#include "vect/core/vec_expr_iterator.hpp"
+#include "vect/core/vector_iterator.hpp"
 namespace vect::core
 {
     template <typename Derived>
@@ -39,6 +41,9 @@ namespace vect::core
         {
             return static_cast<const Derived *>(this)->loadPacketUnaligned(idx);
         }
+
+        auto begin() const {return ExprIterator<Derived>(self(), 0);}
+        auto end() const {return ExprIterator<Derived>(self(), Derived::dim);}
     };
 
     template <typename T>

@@ -2,6 +2,7 @@
 #include "vect/detail/simd_resolver.hpp"
 #include "vect/detail/simd_traits.hpp"
 #include <array>
+#include <span>
 #include <vect/core/vec_expr.hpp>
 
 #include <bit>
@@ -87,6 +88,17 @@ namespace vect::core
             using Packet = typename detail::SimdTraits<T, N>::packetType;
             return Packet::loadUnaligned(&data_[idx]);
         }
+
+        operator std::span<const T, N>() const {
+            return std::span<const T, N>(data_.data(), N);
+        }
+
+        operator std::span<T, N>() {
+            return std::span<T, N>(data_.data(), N);
+        }
+
+
+
 
     private:
         template <typename Expr, size_t... Ints>

@@ -8,6 +8,7 @@
 #include "vect/expr/where_op.hpp"
 
 #include "vect/detail/vector_method.hpp"
+#include "vect/detail/simd_reduction.hpp"
 #include <algorithm>
 namespace vect::expr
 {
@@ -274,59 +275,43 @@ namespace vect::expr
                    { return std::clamp(x, static_cast<decltype(x)>(lo), static_cast<decltype(x)>(hi)); });
     }
 
-    template <typename E>
-        requires core::IsVecExpr<E>
-    bool all(const E &expr)
-    {
-        using T = typename E::valueType;
-        using Traits = detail::SimdTraits<T, E::dim>;
+    template <core::IsVecExpr V>
+    bool all(const V& expr) {
+        const V& derived = expr.self();
+        using valueType = V::valueType;
+        using Traits = detail::SimdTraits<valueType, V::dim>;
 
-        size_t idx = 0;
-        if constexpr (Traits::available)
-        {
-            using Packet = typename Traits::packetType;
-            for (; idx <= E::dim - Traits::width; idx += Traits::width)
-            {
-                Packet packet = expr.loadPacket(idx);
-
-                using detail::all;
-                if (!all(packet))
-                    return false;
+        size_t i = 0;
+        if constexpr (Traits::available) {
+            for (; i <= V::dim - Traits::width; i += Traits::width) {
+                auto mask = derived.loadPacketUnaligned(i);
+                if (!detail::simdAllFull(mask)) return false;
             }
         }
 
-        for (; idx < E::dim; ++idx)
-        {
-            if (!expr[idx])
-                return false;
+        for (; i < V::dim; ++i) {
+            if (!static_cast<bool>(derived[i])) return false;
         }
 
         return true;
     }
 
-    template <typename E>
-        requires core::IsVecExpr<E>
-    bool any(const E &expr)
-    {
-        using T = typename E::valueType;
-        using Traits = detail::SimdTraits<T, E::dim>;
-        size_t idx = 0;
-        if constexpr (Traits::available)
-        {
-            for (; idx <= E::dim - Traits::width; idx += Traits::width)
-            {
-                auto packet = expr.loadPacket(idx);
+    template <core::IsVecExpr V>
+    bool any(const V& expr) {
+        const V& derived = expr.self();
+        using valueType = V::valueType;
+        using Traits = detail::SimdTraits<valueType, V::dim>;
 
-                using detail::any;
-                if (any(packet))
-                    return true;
+        size_t i = 0;
+        if constexpr (Traits::available) {
+            for (; i <= V::dim - Traits::width; i += Traits::width) {
+                auto mask = derived.loadPacketUnaligned(i);
+                if (detail::simdAnyFull(mask)) return true;
             }
         }
 
-        for (; idx < E::dim; ++idx)
-        {
-            if (expr[idx])
-                return true;
+        for (; i < V::dim; ++i) {
+            if (static_cast<bool>(derived[i])) return true;
         }
 
         return false;

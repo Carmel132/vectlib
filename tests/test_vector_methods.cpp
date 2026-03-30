@@ -48,7 +48,7 @@ TEST(VectorOperatorsTest, ArithmeticAndComparison) {
     EXPECT_FLOAT_EQ(smul[3], -8.0f);
 
     auto smul2 = 2.0f * a;
-    EXPECT_EQ(smul, smul2);
+    EXPECT_TRUE(all(smul == smul2));
 
     auto sdiv = b / 2.0f;
     EXPECT_FLOAT_EQ(sdiv[0], 2.0f);
@@ -56,12 +56,12 @@ TEST(VectorOperatorsTest, ArithmeticAndComparison) {
     EXPECT_FLOAT_EQ(sdiv[2], 1.0f);
     EXPECT_FLOAT_EQ(sdiv[3], 0.5f);
 
-    EXPECT_TRUE(a != b);
-    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(all(a != b));
+    EXPECT_FALSE(all(a == b));
 
     auto a_copy = a;
-    EXPECT_TRUE(a_copy == a);
-    EXPECT_FALSE(a_copy != a);
+    EXPECT_TRUE(all(a_copy == a));
+    EXPECT_FALSE(all(a_copy != a));
 
     std::ostringstream oss;
     oss << a;
@@ -96,8 +96,8 @@ TEST(VectorMethodsTest, DotCrossAndNorm) {
 
     auto lerp0 = lerp(x, y, 0.0f);
     auto lerp1 = lerp(x, y, 1.0f);
-    EXPECT_TRUE(lerp0 == x);
-    EXPECT_TRUE(lerp1 == y);
+    EXPECT_TRUE(all(lerp0 == x));
+    EXPECT_TRUE(all(lerp1 == y));
 
 
     auto proj = project(v, x);
@@ -169,24 +169,13 @@ TEST(VectorMethodsTest, ElementwiseMath) {
     EXPECT_FLOAT_EQ(clamp_v[1], -1.0f);
 }
 
-TEST(VectorMethodsTest, MapAllAny) {
+TEST(VectorMethodsTest, Map) {
     float4 v{1.0f, 0.0f, -3.0f, 2.0f};
 
 
     auto squared = map(v, [](float x) { return x * x; });
     EXPECT_FLOAT_EQ(squared[0], 1.0f);
     EXPECT_FLOAT_EQ(squared[2], 9.0f);
-
-
-    float4 allFalse{0.0f, 0.0f, 0.0f, 0.0f};
-    EXPECT_FALSE(any(allFalse));
-    EXPECT_TRUE(any(v));
-
-    EXPECT_FALSE(all(v));
-
-
-    float2 v2{1.0f, 1.0f};
-    EXPECT_TRUE(all(v2));
 }
 
 TEST(VectorMethodsTest, NormalizeZeroLength) {

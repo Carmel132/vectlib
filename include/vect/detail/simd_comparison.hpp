@@ -228,7 +228,7 @@ namespace vect::detail
     struct LogicalAnd
     {
         template <typename A, typename B>
-        requires std::is_arithmetic_v<A> && std::is_arithmetic_v<B>
+        requires (!isMask_v<A> && !isMask_v<B>)
         auto operator()(A a, B b) const { return a && b; }
 
         auto operator()(Mask4f a, Mask4f b) const -> Mask4f
@@ -280,7 +280,7 @@ namespace vect::detail
     struct LogicalOr
     {
         template <typename A, typename B>
-        requires std::is_arithmetic_v<A> && std::is_arithmetic_v<B>
+        requires (!isMask_v<A> && !isMask_v<B>)
         auto operator()(A a, B b) const { return a || b; }
 
         auto operator()(Mask4f a, Mask4f b) const -> Mask4f
@@ -312,11 +312,27 @@ namespace vect::detail
         {
             return Mask8i::fromReg(_mm256_or_si256(a.reg, b.reg));
         }
+
+        template <typename L, typename R>
+        auto operator()(L l, R r) const {
+            auto lMask = [&]() {
+                if constexpr (isMask_v<L>) return l;
+                else return simdIsNonzero(l);
+            }();
+
+            auto rMask = [&]() {
+                if constexpr (isMask_v<R>) return r;
+                else return simdIsNonzero(r);
+            }();
+
+            return (*this)(lMask, rMask);
+        }
     };
 
     struct LogicalNot
     {
         template <typename T>
+        requires (!isMask_v<T>)
         auto operator()(T a) const { return !a; }
 
         auto operator()(Mask4f a) const -> Mask4f
@@ -351,6 +367,16 @@ namespace vect::detail
         auto operator()(Mask8i a) const -> Mask8i
         {
             return Mask8i::fromReg(_mm256_xor_si256(a.reg, _mm256_set1_epi32(-1)));
+        }
+
+        template <typename P>
+        auto operator()(P p) const {
+            auto mask = [&]() {
+                if constexpr (isMask_v<P>) return p;
+                else return simdIsNonzero(p);
+            }();
+
+            return (*this)(mask);
         }
     };
 

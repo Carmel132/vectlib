@@ -481,3 +481,88 @@ TEST(UnalignedSimdTest, UnalignedDoublePacket) {
     EXPECT_DOUBLE_EQ(data[0], 1.5);
     EXPECT_DOUBLE_EQ(data[1], 2.5);
 }
+
+TEST(VectorComparisonLogicalTest, ComparisonWithLogicalOperators) {
+    float4 a{1.0f, 5.0f, 3.0f, 7.0f};
+    float4 b{2.0f, 4.0f, 3.0f, 8.0f};
+    float4 c{0.0f, 6.0f, 2.0f, 9.0f};
+    float4 d{3.0f, 3.0f, 4.0f, 6.0f};
+
+    // Test logical AND between comparison results
+    auto and_result = (a > b) && (c < d);
+    // a > b: [false, true, false, false]
+    // c < d: [true, false, true, false]
+    // AND: [false, false, false, false]
+    EXPECT_FALSE(all(and_result));
+    EXPECT_FALSE(any(and_result));
+
+    // Test logical OR between comparison results
+    auto or_result = (a > b) || (c < d);
+    // a > b: [false, true, false, false]
+    // c < d: [true, false, true, false]
+    // OR: [true, true, true, false]
+    EXPECT_FALSE(all(or_result));
+    EXPECT_TRUE(any(or_result));
+
+    // Test combination with different comparisons
+    auto complex_result = (a >= b) && (c <= d);
+    // a >= b: [false, true, true, false]
+    // c <= d: [true, false, true, false]
+    // AND: [false, false, true, false]
+    EXPECT_FALSE(all(complex_result));
+    EXPECT_TRUE(any(complex_result));
+
+    // Test with equality
+    auto eq_and = (a == b) && (c == d);
+    EXPECT_FALSE(all(eq_and));
+    EXPECT_FALSE(any(eq_and));
+
+    auto eq_or = (a == b) || (c == d);
+    EXPECT_FALSE(all(eq_or));
+    EXPECT_TRUE(any(eq_or));
+
+    // Test implicit conversion in where() - using logical result as mask
+    float4 true_vals{10.0f, 20.0f, 30.0f, 40.0f};
+    float4 false_vals{100.0f, 200.0f, 300.0f, 400.0f};
+    auto where_result = where((a > b) && (c < d), true_vals, false_vals);
+    // Since AND result is all false, should select false_vals
+    EXPECT_FLOAT_EQ(where_result[0], 100.0f);
+    EXPECT_FLOAT_EQ(where_result[1], 200.0f);
+    EXPECT_FLOAT_EQ(where_result[2], 300.0f);
+    EXPECT_FLOAT_EQ(where_result[3], 400.0f);
+
+    // Test with mixed types - comparison with scalar
+    auto scalar_comp = (a > 2.0f) && (b < 6.0f);
+    // a > 2.0f: [false, true, true, true]
+    // b < 6.0f: [true, true, false, false]
+    // AND: [false, true, false, false]
+    EXPECT_FALSE(all(scalar_comp));
+    EXPECT_TRUE(any(scalar_comp));
+
+    // Test logical NOT
+    auto not_result = !(a > b);
+    // a > b: [false, true, false, false]
+    // NOT: [true, false, true, true]
+    EXPECT_FALSE(all(not_result));
+    EXPECT_TRUE(any(not_result));
+
+    // Test implicit conversion with vector (treating vector as boolean mask)
+    float4 bool_vec{0.0f, 1.0f, 0.0f, 1.0f}; // 0 = false, non-zero = true
+    auto mask_from_vec = bool_vec != float4{0.0f, 0.0f, 0.0f, 0.0f}; // convert to mask
+    auto implicit_and = (a > b) && mask_from_vec;
+    // a > b: [false, true, false, false]
+    // mask_from_vec: [false, true, false, true]
+    // AND: [false, true, false, false]
+    EXPECT_FALSE(all(implicit_and));
+    EXPECT_TRUE(any(implicit_and));
+
+    // Test chaining logical operators
+    auto chained = (a > b) || ((c < d) && (a <= c));
+    // a > b: [false, true, false, false]
+    // c < d: [true, false, true, false]
+    // a <= c: [true, false, true, false] (a:1,5,3,7 c:0,6,2,9)
+    // (c < d) && (a <= c): [true, false, true, false]
+    // OR: [true, true, true, false]
+    EXPECT_FALSE(all(chained));
+    EXPECT_TRUE(any(chained));
+}

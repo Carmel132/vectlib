@@ -1,9 +1,8 @@
 #pragma once
-#include "vect/detail/simd_traits.hpp"
 #include "vect/detail/simd_resolver.hpp"
+#include "vect/detail/simd_traits.hpp"
 #include <array>
 #include <vect/core/vec_expr.hpp>
-
 
 #include <bit>
 namespace vect::core
@@ -13,7 +12,6 @@ namespace vect::core
     class alignas(detail::SimdTraits<T, N>::alignment) Vector : public VecExpr<Vector<T, N>>
     {
     public:
-        
         static constexpr size_t alignment = detail::SimdTraits<T, N>::alignment;
 
         alignas(alignment)
@@ -56,10 +54,13 @@ namespace vect::core
             {
                 for (; idx <= N - Traits::width; idx += Traits::width)
                 {
-                    if constexpr (R::isAligned) {
+                    if constexpr (R::isAligned)
+                    {
                         auto packet = derived.loadPacket(idx);
                         packet.store(&data_[idx]);
-                    } else {
+                    }
+                    else
+                    {
                         auto packet = derived.loadPacketUnaligned(idx);
                         packet.storeUnaligned(&data_[idx]);
                     }
@@ -74,13 +75,14 @@ namespace vect::core
             return *this;
         }
 
-        auto loadPacket(size_t idx) const
+        [[nodiscard]] auto loadPacket(size_t idx) const
         {
             using Packet = typename detail::SimdTraits<T, N>::packetType;
             return Packet::load(&data_[idx]);
         }
 
-        auto loadPacketUnaligned(size_t idx) const {
+        [[nodiscard]] auto loadPacketUnaligned(size_t idx) const
+        {
             using Packet = typename detail::SimdTraits<T, N>::packetType;
             return Packet::loadUnaligned(&data_[idx]);
         }

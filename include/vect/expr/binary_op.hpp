@@ -1,7 +1,7 @@
 #pragma once
 #include "vect/core/vec_expr.hpp"
-#include "vect/expr/capture_strategy.hpp"
 #include "vect/detail/simd_packet.hpp"
+#include "vect/expr/capture_strategy.hpp"
 namespace vect::expr
 {
     template <typename L, typename R, typename Op>
@@ -16,7 +16,7 @@ namespace vect::expr
         static constexpr size_t dim = L::dim;
         BinaryOp(const L &l, const R &r, Op op = Op{}) : l_{l}, r_{r}, op_{op} {}
 
-        auto operator[](size_t idx) const -> valueType
+        auto operator[](size_t idx) const
         {
             return op_(l_[idx], r_[idx]);
         }
@@ -26,7 +26,7 @@ namespace vect::expr
             return l_.size() != 0 ? l_.size() : r_.size();
         }
 
-        auto loadPacket(size_t idx) const
+        [[nodiscard]] auto loadPacket(size_t idx) const
         {
             auto leftPacket = l_.loadPacket(idx);
             auto rightPacket = r_.loadPacket(idx);
@@ -34,7 +34,7 @@ namespace vect::expr
             return applyOp(leftPacket, rightPacket);
         }
 
-        auto loadPacketUnaligned(size_t idx) const
+        [[nodiscard]] auto loadPacketUnaligned(size_t idx) const
         {
             auto leftPacket = l_.loadPacketUnaligned(idx);
             auto rightPacket = r_.loadPacketUnaligned(idx);
@@ -42,13 +42,17 @@ namespace vect::expr
             return applyOp(leftPacket, rightPacket);
         }
 
-        private:
+    private:
         template <typename P>
-        auto applyOp(const P& leftPacket, const P& rightPacket) const {
-        
-            if constexpr (requires {op_(leftPacket, rightPacket);}) {
+        [[nodiscard]] auto applyOp(const P &leftPacket, const P &rightPacket) const
+        {
+
+            if constexpr (requires { op_(leftPacket, rightPacket); })
+            {
                 return op_(leftPacket, rightPacket);
-            } else {
+            }
+            else
+            {
                 using T = typename L::valueType;
                 using Traits = detail::SimdTraits<T, L::dim>;
                 constexpr size_t width = Traits::width;
@@ -59,13 +63,13 @@ namespace vect::expr
                 leftPacket.store(lvals);
                 rightPacket.store(rvals);
 
-                for (size_t idx{}; idx < width; ++idx) {
+                for (size_t idx{}; idx < width; ++idx)
+                {
                     res[idx] = op_(lvals[idx], rvals[idx]);
                 }
 
                 return P::load(res);
             }
-        
         }
     };
 }

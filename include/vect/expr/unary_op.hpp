@@ -1,9 +1,8 @@
 #pragma once
 #include "vect/core/vec_expr.hpp"
 #include "vect/core/vector.hpp"
-#include "vect/expr/capture_strategy.hpp"
 #include "vect/detail/simd_packet.hpp"
-
+#include "vect/expr/capture_strategy.hpp"
 
 namespace vect::expr
 {
@@ -22,22 +21,28 @@ namespace vect::expr
         {
             return op_(v_[idx]);
         }
-        [[nodiscard]] constexpr auto size() const -> size_t{ return v_.size(); }
+        [[nodiscard]] constexpr auto size() const -> size_t { return v_.size(); }
 
-        auto loadPacket(size_t idx) const {
+        [[nodiscard]] auto loadPacket(size_t idx) const
+        {
             return applyOp(v_.loadPacket(idx));
         }
 
-        auto loadPacketUnaligned(size_t idx) const {
+        [[nodiscard]] auto loadPacketUnaligned(size_t idx) const
+        {
             return applyOp(v_.loadPacketUnaligned(idx));
         }
 
-        private:
+    private:
         template <typename P>
-        auto applyOp(const P& packet) const {
-            if constexpr (requires {op_(packet); }) {
+        [[nodiscard]] auto applyOp(const P &packet) const
+        {
+            if constexpr (requires { op_(packet); })
+            {
                 return op_(packet);
-            } else {
+            }
+            else
+            {
                 using T = typename V::valueType;
                 using Traits = detail::SimdTraits<T, V::dim>;
                 constexpr size_t width = Traits::width;
@@ -46,13 +51,13 @@ namespace vect::expr
 
                 packet.store(vals);
 
-                for (size_t j = 0; j < width; ++j) {
+                for (size_t j = 0; j < width; ++j)
+                {
                     res[j] = op_(vals[j]);
                 }
 
                 return P::load(res);
             }
-            
         }
     };
 }

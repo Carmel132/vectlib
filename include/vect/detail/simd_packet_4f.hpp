@@ -1,6 +1,6 @@
 #pragma once
-#include <immintrin.h>
 #include <cmath>
+#include <immintrin.h>
 namespace vect::detail
 {
     struct Packet4f
@@ -15,14 +15,17 @@ namespace vect::detail
         {
             _mm_store_ps(dest, reg);
         }
-        void storeUnaligned(float* dest) const {
+        void storeUnaligned(float *dest) const
+        {
             _mm_storeu_ps(dest, reg);
         }
 
-        static Packet4f load(const float* src) {
+        static auto load(const float *src) -> Packet4f
+        {
             return {_mm_load_ps(src)};
         }
-        static Packet4f loadUnaligned(const float* src) {
+        static auto loadUnaligned(const float *src) -> Packet4f
+        {
             return {_mm_loadu_ps(src)};
         }
 
@@ -47,7 +50,8 @@ namespace vect::detail
             return {_mm_sub_ps(_mm_setzero_ps(), a.reg)};
         }
 
-        static Packet4f broadcast(float val) {
+        static auto broadcast(float val) -> Packet4f
+        {
             return {_mm_set1_ps(val)};
         }
     };
@@ -108,14 +112,16 @@ namespace vect::detail
         return {_mm_mul_ps(a.reg, inv_n)};
     }
 
-    inline bool all(Packet4f a) {
+    inline auto all(Packet4f a) -> bool
+    {
         __m128 zero = _mm_setzero_ps();
         __m128 cmp = _mm_cmpneq_ps(a.reg, zero);
         int mask = _mm_movemask_ps(cmp);
         return mask == 15; // all 4 bits set
     }
 
-    inline bool any(Packet4f a) {
+    inline auto any(Packet4f a) -> bool
+    {
         __m128 zero = _mm_setzero_ps();
         __m128 cmp = _mm_cmpneq_ps(a.reg, zero);
         int mask = _mm_movemask_ps(cmp);

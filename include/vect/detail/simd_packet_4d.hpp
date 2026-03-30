@@ -1,29 +1,35 @@
 #pragma once
-#include <immintrin.h>
 #include <cmath>
+#include <immintrin.h>
 namespace vect::detail
 {
-    struct Packet4d {
-        union {
+    struct Packet4d
+    {
+        union
+        {
             __m256d reg;
             double vals[4];
         };
-        void store(double* dest) const 
+        void store(double *dest) const
         {
             _mm256_store_pd(dest, reg);
         }
-        void storeUnaligned(double* dest) const {
+        void storeUnaligned(double *dest) const
+        {
             _mm256_storeu_pd(dest, reg);
         }
 
-        static Packet4d load(const double* src) {
+        static auto load(const double *src) -> Packet4d
+        {
             return {_mm256_load_pd(src)};
         }
-        static Packet4d loadUnaligned(const double* src) {
+        static auto loadUnaligned(const double *src) -> Packet4d
+        {
             return {_mm256_loadu_pd(src)};
         }
 
-        static Packet4d broadcast(double val) {
+        static auto broadcast(double val) -> Packet4d
+        {
             return {_mm256_set1_pd(val)};
         }
 
@@ -49,40 +55,47 @@ namespace vect::detail
         }
     };
 
-    inline double dot(Packet4d a, Packet4d b) {
+    inline auto dot(Packet4d a, Packet4d b) -> double
+    {
         __m256d prod = _mm256_mul_pd(a.reg, b.reg);
         __m256d sum1 = _mm256_hadd_pd(prod, prod);
         __m256d sum2 = _mm256_hadd_pd(sum1, sum1);
         return _mm256_cvtsd_f64(sum2);
     }
 
-    inline double sum(Packet4d a) {
+    inline auto sum(Packet4d a) -> double
+    {
         __m256d sum1 = _mm256_hadd_pd(a.reg, a.reg);
         __m256d sum2 = _mm256_hadd_pd(sum1, sum1);
         return _mm256_cvtsd_f64(sum2);
     }
 
-    inline Packet4d sqrt(Packet4d a) {
+    inline auto sqrt(Packet4d a) -> Packet4d
+    {
         return {_mm256_sqrt_pd(a.reg)};
     }
 
-    inline double norm(Packet4d a) {
+    inline auto norm(Packet4d a) -> double
+    {
         return std::sqrt(dot(a, a));
     }
 
-    inline double min_element(Packet4d a) {
+    inline auto min_element(Packet4d a) -> double
+    {
         __m256d min1 = _mm256_min_pd(a.reg, _mm256_shuffle_pd(a.reg, a.reg, 5)); // 0b0101
         __m256d min2 = _mm256_min_pd(min1, _mm256_permute2f128_pd(min1, min1, 1));
         return _mm256_cvtsd_f64(min2);
     }
 
-    inline double max_element(Packet4d a) {
+    inline auto max_element(Packet4d a) -> double
+    {
         __m256d max1 = _mm256_max_pd(a.reg, _mm256_shuffle_pd(a.reg, a.reg, 5));
         __m256d max2 = _mm256_max_pd(max1, _mm256_permute2f128_pd(max1, max1, 1));
         return _mm256_cvtsd_f64(max2);
     }
 
-    inline Packet4d cross(Packet4d a, Packet4d b) {
+    inline auto cross(Packet4d a, Packet4d b) -> Packet4d
+    {
         alignas(32) double avals[4];
         alignas(32) double bvals[4];
         _mm256_store_pd(avals, a.reg);
@@ -91,26 +104,29 @@ namespace vect::detail
             avals[1] * bvals[2] - avals[2] * bvals[1],
             avals[2] * bvals[0] - avals[0] * bvals[2],
             avals[0] * bvals[1] - avals[1] * bvals[0],
-            0.0
-        };
+            0.0};
         return {_mm256_load_pd(result)};
     }
 
-    inline Packet4d normalize(Packet4d a) {
+    inline auto normalize(Packet4d a) -> Packet4d
+    {
         double n = norm(a);
-        if (n == 0.0) return a;
+        if (n == 0.0)
+            return a;
         __m256d inv_n = _mm256_set1_pd(1.0 / n);
         return {_mm256_mul_pd(a.reg, inv_n)};
     }
 
-    inline bool all(Packet4d a) {
+    inline auto all(Packet4d a) -> bool
+    {
         __m256d zero = _mm256_setzero_pd();
         __m256d cmp = _mm256_cmp_pd(a.reg, zero, _CMP_NEQ_OQ);
         int mask = _mm256_movemask_pd(cmp);
         return mask == 15; // all 4 bits set
     }
 
-    inline bool any(Packet4d a) {
+    inline auto any(Packet4d a) -> bool
+    {
         __m256d zero = _mm256_setzero_pd();
         __m256d cmp = _mm256_cmp_pd(a.reg, zero, _CMP_NEQ_OQ);
         int mask = _mm256_movemask_pd(cmp);

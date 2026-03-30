@@ -11,6 +11,8 @@ namespace vect
 
     using expr::abs;
     using expr::acos;
+    using expr::all;
+    using expr::any;
     using expr::asin;
     using expr::atan;
     using expr::ceil;
@@ -38,8 +40,7 @@ namespace vect
     using expr::sqrt;
     using expr::sum;
     using expr::tan;
-    using expr::any;
-    using expr::all;
+    using expr::where;
 
     using float2 = core::Vector<float, 2>;
     using float3 = core::Vector<float, 3>;
@@ -51,5 +52,5 @@ namespace vect
     using int2 = core::Vector<int, 2>;
     using int3 = core::Vector<int, 3>;
     using int4 = core::Vector<int, 4>;
-    
+
 }

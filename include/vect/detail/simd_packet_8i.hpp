@@ -1,114 +1,131 @@
 #pragma once
-#include <immintrin.h>
 #include <algorithm>
+#include <immintrin.h>
 namespace vect::detail
 {
     struct Packet8i
-  {
-    union
     {
-        __m256i reg;
-        int vals[8];
-    };
-    void store(int* dest) const
-    {
-        _mm256_store_si256((__m256i*)dest, reg);
-    }
-    void storeUnaligned(int* dest) const 
-    {
-        _mm256_storeu_si256((__m256i*)dest, reg);
-    }
-
-    static Packet8i load(const int* src) {
-        return {_mm256_load_si256((__m256i*)src)};
-    }
-    static Packet8i loadUnaligned(const int* src) {
-        return {_mm256_loadu_si256((__m256i*)src)};
-    }
-
-    static Packet8i broadcast(int val) {
-        return {_mm256_set1_epi32(val)};
-    }
-
-    friend auto operator+(Packet8i a, Packet8i b) -> Packet8i
-    {
-        return {_mm256_add_epi32(a.reg, b.reg)};
-    }
-    friend auto operator-(Packet8i a, Packet8i b) -> Packet8i
-    {
-        return {_mm256_sub_epi32(a.reg, b.reg)};
-    }
-    friend auto operator*(Packet8i a, Packet8i b) -> Packet8i
-    {
-        return {_mm256_mullo_epi32(a.reg, b.reg)};
-    }
-    friend auto operator/(Packet8i a, Packet8i b) -> Packet8i
-    {
-        alignas(32) int avals[8];
-        alignas(32) int bvals[8];
-        alignas(32) int resultVals[8];
-        _mm256_store_si256((__m256i*)avals, a.reg);
-        _mm256_store_si256((__m256i*)bvals, b.reg);
-        for (int j = 0; j < 8; ++j)
+        union
         {
-            resultVals[j] = avals[j] / bvals[j];
+            __m256i reg;
+            int vals[8];
+        };
+        void store(int *dest) const
+        {
+            _mm256_store_si256((__m256i *)dest, reg);
         }
-        return {_mm256_load_si256((__m256i*)resultVals)};
-    }
-    friend auto operator-(Packet8i a) -> Packet8i
-    {
-        return {_mm256_sub_epi32(_mm256_setzero_si256(), a.reg)};
-    }
-  };
+        void storeUnaligned(int *dest) const
+        {
+            _mm256_storeu_si256((__m256i *)dest, reg);
+        }
 
-    inline int dot(Packet8i a, Packet8i b) {
+        static auto load(const int *src) -> Packet8i
+        {
+            return {_mm256_load_si256((__m256i *)src)};
+        }
+        static auto loadUnaligned(const int *src) -> Packet8i
+        {
+            return {_mm256_loadu_si256((__m256i *)src)};
+        }
+
+        static auto broadcast(int val) -> Packet8i
+        {
+            return {_mm256_set1_epi32(val)};
+        }
+
+        friend auto operator+(Packet8i a, Packet8i b) -> Packet8i
+        {
+            return {_mm256_add_epi32(a.reg, b.reg)};
+        }
+        friend auto operator-(Packet8i a, Packet8i b) -> Packet8i
+        {
+            return {_mm256_sub_epi32(a.reg, b.reg)};
+        }
+        friend auto operator*(Packet8i a, Packet8i b) -> Packet8i
+        {
+            return {_mm256_mullo_epi32(a.reg, b.reg)};
+        }
+        friend auto operator/(Packet8i a, Packet8i b) -> Packet8i
+        {
+            alignas(32) int avals[8];
+            alignas(32) int bvals[8];
+            alignas(32) int resultVals[8];
+            _mm256_store_si256((__m256i *)avals, a.reg);
+            _mm256_store_si256((__m256i *)bvals, b.reg);
+            for (int j = 0; j < 8; ++j)
+            {
+                resultVals[j] = avals[j] / bvals[j];
+            }
+            return {_mm256_load_si256((__m256i *)resultVals)};
+        }
+        friend auto operator-(Packet8i a) -> Packet8i
+        {
+            return {_mm256_sub_epi32(_mm256_setzero_si256(), a.reg)};
+        }
+    };
+
+    inline auto dot(Packet8i a, Packet8i b) -> int
+    {
         __m256i prod = _mm256_mullo_epi32(a.reg, b.reg);
         alignas(32) int vals[8];
-        _mm256_store_si256((__m256i*)vals, prod);
+        _mm256_store_si256((__m256i *)vals, prod);
         int sum = 0;
-        for (int i = 0; i < 8; ++i) sum += vals[i];
+        for (int i = 0; i < 8; ++i)
+            sum += vals[i];
         return sum;
     }
 
-    inline int sum(Packet8i a) {
+    inline auto sum(Packet8i a) -> int
+    {
         alignas(32) int vals[8];
-        _mm256_store_si256((__m256i*)vals, a.reg);
+        _mm256_store_si256((__m256i *)vals, a.reg);
         int sum = 0;
-        for (int i = 0; i < 8; ++i) sum += vals[i];
+        for (int i = 0; i < 8; ++i)
+            sum += vals[i];
         return sum;
     }
 
-    inline int min_element(Packet8i a) {
+    inline auto min_element(Packet8i a) -> int
+    {
         alignas(32) int vals[8];
-        _mm256_store_si256((__m256i*)vals, a.reg);
+        _mm256_store_si256((__m256i *)vals, a.reg);
         int min = vals[0];
-        for (int i = 1; i < 8; ++i) min = std::min(min, vals[i]);
+        for (int i = 1; i < 8; ++i)
+            min = std::min(min, vals[i]);
         return min;
     }
 
-    inline int max_element(Packet8i a) {
+    inline auto max_element(Packet8i a) -> int
+    {
         alignas(32) int vals[8];
-        _mm256_store_si256((__m256i*)vals, a.reg);
+        _mm256_store_si256((__m256i *)vals, a.reg);
         int max = vals[0];
-        for (int i = 1; i < 8; ++i) max = std::max(max, vals[i]);
+        for (int i = 1; i < 8; ++i)
+            max = std::max(max, vals[i]);
         return max;
     }
 
-    inline bool all(Packet8i a) {
+    inline auto all(Packet8i a) -> bool
+    {
         __m256i zero = _mm256_setzero_si256();
         __m256i cmp = _mm256_cmpeq_epi32(a.reg, zero);
         alignas(32) int vals[8];
-        _mm256_store_si256((__m256i*)vals, cmp);
-        for (int i = 0; i < 8; ++i) if (vals[i] != 0) return false;
+        _mm256_store_si256((__m256i *)vals, cmp);
+        for (int i = 0; i < 8; ++i)
+            if (vals[i] != 0)
+                return false;
         return true;
     }
 
-    inline bool any(Packet8i a) {
+    inline auto any(Packet8i a) -> bool
+    {
         __m256i zero = _mm256_setzero_si256();
         __m256i cmp = _mm256_cmpeq_epi32(a.reg, zero);
         alignas(32) int vals[8];
-        _mm256_store_si256((__m256i*)vals, cmp);
-        for (int i = 0; i < 8; ++i) if (vals[i] != 0) return true;
+        _mm256_store_si256((__m256i *)vals, cmp);
+        for (int i = 0; i < 8; ++i)
+            if (vals[i] != 0)
+                return true;
         return false;
     }
 }

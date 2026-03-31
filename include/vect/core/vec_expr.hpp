@@ -44,6 +44,15 @@ namespace vect::core
 
         auto begin() const {return ExprIterator<Derived>(self(), 0);}
         auto end() const {return ExprIterator<Derived>(self(), Derived::dim);}
+
+
+        // For structured bindings if ur into that sorta thing
+        template <size_t I>
+        auto get() {
+            static_assert(I < Derived::dim, "Index out of bounds");
+            return self()[I];
+        }
+
     };
 
     template <typename T>
@@ -51,4 +60,15 @@ namespace vect::core
 
     template <typename T>
     concept IsVec3Expr = IsVecExpr<T> && T::dim == 3;
+}
+
+namespace std {
+    template <vect::core::IsVecExpr E>
+    struct tuple_size<E> : std::integral_constant<size_t, E::dim> {};
+
+    template <size_t I, vect::core::IsVecExpr E>
+    struct tuple_element<I, E> {
+        using type = typename E::valueType;
+    };
+
 }

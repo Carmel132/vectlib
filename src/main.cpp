@@ -24,7 +24,8 @@ auto main() -> int
     // v1 = v1 + v2;
     // std::print("Should be equal: {}, should not (different): {}, should not (size): {}", v1==v2, vect::sin(v1) == v2, v1.swizzle<2, 0>() == v2);
     // std::println("Sum: {}", );
-    auto res = where((v1 < v2) && (mask ), -v1, v2);
-    std::cout << res;
+    auto [a, b, c, d] = v1;
+    std::print("a: {}, b: {}, c: {}, d: {}\n", a, b, c, d);
+
     return 0;
 }

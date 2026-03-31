@@ -3,6 +3,7 @@
 #include "vect/detail/simd_traits.hpp"
 #include <array>
 #include <span>
+#include <utility>
 #include <vect/core/vec_expr.hpp>
 
 #include <bit>
@@ -97,7 +98,23 @@ namespace vect::core
             return std::span<T, N>(data_.data(), N);
         }
 
+        // For structured bindings if ur into that sorta thing
+        template <size_t I>
+        auto get() & -> T& {
+            static_assert(I < N, "Index out of bounds");
+            return data_[I];
+        }
 
+        template <size_t I>
+        const T& get() const& {
+            static_assert(I < N, "Index out of bounds");
+            return data_[I];
+        }
+
+        template <size_t I>
+        T get() && {
+            return (*this)[I];
+        }
 
 
     private:

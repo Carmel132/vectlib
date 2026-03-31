@@ -611,3 +611,29 @@ TEST(VectorComparisonLogicalTest, ComparisonWithLogicalOperators) {
     EXPECT_FALSE(all(chained));
     EXPECT_TRUE(any(chained));
 }
+
+TEST(VectorStructuredBindingTest, StructuredBinding) {
+    float4 a{1.0f, 5.0f, 3.0f, 7.0f};
+    float4 b{2.0f, 4.0f, 3.0f, 8.0f};
+    float4 c{0.0f, 6.0f, 2.0f, 9.0f};
+    const float4 d{3.0f, 3.0f, 4.0f, 6.0f};
+
+    auto [x, y, z, w] = a;
+    EXPECT_TRUE(all(a == float4{x, y, z, w}));
+
+    auto [x2, y2, z2, w2] = a + b;
+    EXPECT_TRUE(all((a + b) == float4{x2, y2, z2, w2}));
+
+    auto [x3, y3, z3, w3] = c.swizzle<2, 0, 3, 1>();
+    EXPECT_TRUE(all(c.swizzle<2, 0, 3, 1>() == float4{x3, y3, z3, w3}));
+
+    auto [x4, y4, z4, w4] = d;
+    EXPECT_TRUE(all(d == float4{x4, y4, z4, w4}));
+    
+    auto& [cx, cy, cz, cw] = d;
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(cx)>>, "Binding should be const");
+
+    auto& [rx, ry, rz, rw] = a;
+    rx = 10.0f;
+    EXPECT_FLOAT_EQ(a[0], 10.0f);
+}

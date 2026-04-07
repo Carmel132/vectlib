@@ -228,8 +228,11 @@ namespace vect::detail
     struct LogicalAnd
     {
         template <typename A, typename B>
-        requires (!isMask_v<A> && !isMask_v<B>)
-        auto operator()(A a, B b) const { return a && b; }
+            requires(!isMask_v<A> && !isMask_v<B>)
+        auto operator()(A a, B b) const
+        {
+            return a && b;
+        }
 
         auto operator()(Mask4f a, Mask4f b) const -> Mask4f
         {
@@ -262,15 +265,22 @@ namespace vect::detail
         }
 
         template <typename L, typename R>
-        auto operator()(L l, R r) const {
-            auto lMask = [&]() {
-                if constexpr (isMask_v<L>) return l;
-                else return simdIsNonzero(l);
+        auto operator()(L l, R r) const
+        {
+            auto lMask = [&]()
+            {
+                if constexpr (isMask_v<L>)
+                    return l;
+                else
+                    return simdIsNonzero(l);
             }();
 
-            auto rMask = [&]() {
-                if constexpr (isMask_v<R>) return r;
-                else return simdIsNonzero(r);
+            auto rMask = [&]()
+            {
+                if constexpr (isMask_v<R>)
+                    return r;
+                else
+                    return simdIsNonzero(r);
             }();
 
             return (*this)(lMask, rMask);
@@ -280,8 +290,11 @@ namespace vect::detail
     struct LogicalOr
     {
         template <typename A, typename B>
-        requires (!isMask_v<A> && !isMask_v<B>)
-        auto operator()(A a, B b) const { return a || b; }
+            requires(!isMask_v<A> && !isMask_v<B>)
+        auto operator()(A a, B b) const
+        {
+            return a || b;
+        }
 
         auto operator()(Mask4f a, Mask4f b) const -> Mask4f
         {
@@ -314,15 +327,22 @@ namespace vect::detail
         }
 
         template <typename L, typename R>
-        auto operator()(L l, R r) const {
-            auto lMask = [&]() {
-                if constexpr (isMask_v<L>) return l;
-                else return simdIsNonzero(l);
+        auto operator()(L l, R r) const
+        {
+            auto lMask = [&]()
+            {
+                if constexpr (isMask_v<L>)
+                    return l;
+                else
+                    return simdIsNonzero(l);
             }();
 
-            auto rMask = [&]() {
-                if constexpr (isMask_v<R>) return r;
-                else return simdIsNonzero(r);
+            auto rMask = [&]()
+            {
+                if constexpr (isMask_v<R>)
+                    return r;
+                else
+                    return simdIsNonzero(r);
             }();
 
             return (*this)(lMask, rMask);
@@ -332,8 +352,11 @@ namespace vect::detail
     struct LogicalNot
     {
         template <typename T>
-        requires (!isMask_v<T>)
-        auto operator()(T a) const { return !a; }
+            requires(!isMask_v<T>)
+        auto operator()(T a) const
+        {
+            return !a;
+        }
 
         auto operator()(Mask4f a) const -> Mask4f
         {
@@ -370,10 +393,14 @@ namespace vect::detail
         }
 
         template <typename P>
-        auto operator()(P p) const {
-            auto mask = [&]() {
-                if constexpr (isMask_v<P>) return p;
-                else return simdIsNonzero(p);
+        auto operator()(P p) const
+        {
+            auto mask = [&]()
+            {
+                if constexpr (isMask_v<P>)
+                    return p;
+                else
+                    return simdIsNonzero(p);
             }();
 
             return (*this)(mask);

@@ -14,6 +14,7 @@ namespace vect::core
     class alignas(detail::SimdTraits<T, N>::alignment) Vector : public VecExpr<Vector<T, N>>
     {
     public:
+        Vector() = default;
         static constexpr size_t alignment = detail::SimdTraits<T, N>::alignment;
 
         alignas(alignment)
@@ -90,32 +91,36 @@ namespace vect::core
             return Packet::loadUnaligned(&data_[idx]);
         }
 
-        operator std::span<const T, N>() const {
+        operator std::span<const T, N>() const
+        {
             return std::span<const T, N>(data_.data(), N);
         }
 
-        operator std::span<T, N>() {
+        operator std::span<T, N>()
+        {
             return std::span<T, N>(data_.data(), N);
         }
 
         // For structured bindings if ur into that sorta thing
         template <size_t I>
-        auto get() & -> T& {
+        auto get() & -> T &
+        {
             static_assert(I < N, "Index out of bounds");
             return data_[I];
         }
 
         template <size_t I>
-        const T& get() const& {
+        const T &get() const &
+        {
             static_assert(I < N, "Index out of bounds");
             return data_[I];
         }
 
         template <size_t I>
-        T get() && {
+        T get() &&
+        {
             return (*this)[I];
         }
-
 
     private:
         template <typename Expr, size_t... Ints>

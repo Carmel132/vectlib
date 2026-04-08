@@ -80,6 +80,16 @@ namespace vect::detail
         return vals[0] + vals[1] + vals[2] + vals[3];
     }
 
+    inline auto max(Packet4i a, Packet4i b) -> Packet4i
+    {
+        return {_mm_max_epi32(a.reg, b.reg)};
+    }
+
+    inline auto min(Packet4i a, Packet4i b) -> Packet4i
+    {
+        return {_mm_min_epi32(a.reg, b.reg)};
+    }
+
     inline auto min_element(Packet4i a) -> int
     {
         alignas(16) int vals[4];

@@ -1,7 +1,7 @@
 #pragma once
 #include "vect/core/mat_expr.hpp"
 #include "vect/core/vector.hpp"
-#include "vect/detail/mat_defer_eval.hpp"
+#include "vect/detail/defer_eval.hpp"
 #include "vect/detail/simd_traits.hpp"
 #include "vect/expr/mat_column_view.hpp"
 namespace vect::core {
@@ -31,6 +31,7 @@ public:
   const T &at(size_t r, size_t c) const { return rows_[r][c]; }
   T &at(size_t r, size_t c) { return rows_[r][c]; }
 
+  auto &getRow(size_t r) { return rows_[r]; }
   const auto &getRow(size_t r) const { return rows_[r]; }
 
   [[nodiscard]] auto getColumn(size_t c) const {
@@ -47,7 +48,7 @@ public:
   }
 
   template <typename E> Matrix &operator=(const MatExpr<E, T, R, C> &expr) {
-    if constexpr (detail::MatDeferAssign<E>::value) {
+    if constexpr (detail::DeferAssign<E>::value) {
       this->fill(0);
       expr.self().evaluateTo(*this);
     } else {

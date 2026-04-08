@@ -65,6 +65,16 @@ namespace vect::detail
         return _mm_cvtss_f32(sum2);
     }
 
+    inline auto max(Packet4f a, Packet4f b) -> Packet4f
+    {
+        return {_mm_max_ps(a.reg, b.reg)};
+    }
+
+    inline auto min(Packet4f a, Packet4f b) -> Packet4f
+    {
+        return {_mm_min_ps(a.reg, b.reg)};
+    }
+
     inline auto sum(Packet4f a) -> float
     {
         __m128 sum1 = _mm_hadd_ps(a.reg, a.reg);

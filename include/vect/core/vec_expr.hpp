@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <utility>
 #include "vect/core/vec_expr_iterator.hpp"
+#include "vect/detail/simd_traits.hpp"
 namespace vect::core
 {
     template <typename Derived>
@@ -49,6 +50,31 @@ namespace vect::core
         auto get() {
             static_assert(I < Derived::dim, "Index out of bounds");
             return self()[I];
+        }
+
+        template <typename Op, typename T>
+        [[nodiscard]] auto reduce(Op op, T init) const {
+            static constexpr size_t N = Derived::dim;
+
+            using Traits = detail::SimdTraits<T, N>;
+
+            size_t idx = 0;
+
+            T acc = init;
+
+            if constexpr (Traits::available && N >= Traits::width) {
+                auto packetAcc = detail::broadcast(init);
+
+                for (; idx <= N - Traits::width; idx += Traits::width) {
+                    packetAcc = op(packetAcc, self().loadPacket(idx));
+                }
+            }
+
+            for (; idx < N; ++idx) {
+                acc = op(acc, self()[idx]);
+            }
+
+            return acc;
         }
 
     };

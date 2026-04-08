@@ -58,6 +58,32 @@ public:
 };
 
 template <typename L, typename R>
+class VecMatMultExpr : public core::VecExpr<VecMatMultExpr<L, R>> {
+  core::capture_t<L> l_;
+  core::capture_t<R> r_;
+public:
+  static constexpr size_t dim = R::columns;
+  using valueType = typename L::valueType;
+
+  VecMatMultExpr(const L& v, const R& m) : l_(v), r_(m) {
+    static_assert(L::dim == R::rows,
+                  "Vector dimension must match matrix rows for multiplication");
+  }
+
+  void evaluateTo(auto& dest) const {
+    dest.fill(0);
+    for (size_t i = 0; i < L::dim; ++i) {
+      dest.multiplyAccumulate(l_[i], r_.getRow(i));
+    }
+  }
+
+  valueType operator[](size_t idx) const {
+    return dot(l_, r_.getColumn(idx));
+  }
+
+};
+
+template <typename L, typename R>
 class MatMatMultExpr
     : public core ::MatExpr<MatMatMultExpr<L, R>, typename L::valueType,
                             L::rows, R::columns> {
@@ -76,7 +102,7 @@ public:
   template <typename Dest> void evaluateTo(Dest &C) const {
     C.fill(0);
     for (size_t k = 0; k < L::columns; ++k) {
-      auto colA = l_.getCol(k);
+      auto colA = l_.getColumn(k);
       auto rowB = r_.getRow(k);
 
       for (size_t i = 0; i < L::rows; ++i) {
@@ -107,6 +133,12 @@ auto operator*(const M &m, const V &v) {
   return expr::MatVecMultExpr<M, V>(m, v);
 }
 
+template <IsVecExpr V, IsMatExpr M>
+  requires(V::dim == M::rows)
+auto operator*(const V &v, const M &m) {
+  return expr::VecMatMultExpr<V, M>(v, m);
+}
+
 template <IsMatExpr L, IsMatExpr R>
   requires(L::columns == R::rows)
 auto operator*(const L &l, const R &r) {
@@ -118,5 +150,12 @@ template <IsMatExpr M, Scalar S> auto operator*(const M &m, const S &s) {
   return expr::MatBinaryOp<M, MatScalar<T, M::rows, M::columns>,
                            std::multiplies<>>(
       m, MatScalar<T, M::rows, M::columns>(s));
+}
+
+template <IsMatExpr M, Scalar S> auto operator*(const S &s, const M &m) {
+  using T = typename M::valueType;
+  return expr::MatBinaryOp<MatScalar<T, M::rows, M::columns>, M,
+                           std::multiplies<>>(
+      MatScalar<T, M::rows, M::columns>(s), m);
 }
 } // namespace vect::core

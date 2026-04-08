@@ -80,6 +80,16 @@ namespace vect::detail
         return std::sqrt(dot(a, a));
     }
 
+    inline auto max(Packet2d a, Packet2d b) -> Packet2d
+    {
+        return {_mm_max_pd(a.reg, b.reg)};
+    }
+
+    inline auto min(Packet2d a, Packet2d b) -> Packet2d
+    {
+        return {_mm_min_pd(a.reg, b.reg)};
+    }
+
     inline auto min_element(Packet2d a) -> double
     {
         __m128d min = _mm_min_pd(a.reg, _mm_shuffle_pd(a.reg, a.reg, 1));

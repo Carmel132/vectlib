@@ -5,6 +5,7 @@
 #include <span>
 #include <utility>
 #include <vect/core/vec_expr.hpp>
+#include "vect/detail/defer_eval.hpp"
 
 namespace vect::core {
 
@@ -42,6 +43,13 @@ public:
   [[nodiscard]] constexpr auto size() const -> size_t { return N; }
 
   template <typename V> Vector<T, N> &operator=(const VecExpr<V> &expr) {
+
+
+    if constexpr (detail::DeferAssign<V>::value) {
+      expr.evaluateTo(*this);
+      return *this;
+    }
+
     const V &derived = static_cast<const V &>(expr);
     using R = detail::SimdResolver<V>;
     using Traits = detail::SimdTraits<typename R::valueType, R::dim>;
@@ -72,7 +80,6 @@ public:
   }
 
   [[nodiscard]] auto loadPacket(size_t idx) const {
-    using Packet = typename detail::SimdTraits<T, N>::packetType;
     return detail::load<T, detail::SimdTraits<T, N>>(&data_[idx]);
   }
 

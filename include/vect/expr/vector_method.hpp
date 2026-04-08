@@ -9,6 +9,7 @@
 
 #include "vect/detail/simd_reduction.hpp"
 #include "vect/detail/vector_method.hpp"
+#include "vect/expr/mat_method.hpp"
 #include <algorithm>
 namespace vect::expr {
 /**
@@ -119,130 +120,6 @@ template <core::IsVecExpr V, typename F> constexpr auto map(V &&v, F &&f) {
   using FuncType = std::decay_t<F>;
 
   return UnaryOp<ExprType, FuncType>(std::forward<V>(v), std::forward<F>(f));
-}
-
-template <core::IsVecExpr V, core::Scalar S>
-constexpr auto max(const V &v, S s) {
-  return map(v, [s](auto x) { return x > s ? x : s; });
-}
-
-template <core::IsVecExpr V, core::Scalar S>
-constexpr auto min(const V &v, S s) {
-  return map(v, [s](auto x) { return x < s ? x : s; });
-}
-
-template <core::IsVecExpr V> constexpr auto abs(const V &v) {
-  return map(v, [](auto x) {
-    using std::abs;
-    return abs(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto sqrt(const V &v) {
-  return map(v, [](auto x) {
-    using std::sqrt;
-    return sqrt(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto exp(const V &v) {
-  return map(v, [](auto x) {
-    using std::exp;
-    return exp(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto log(const V &v) {
-  return map(v, [](auto x) {
-    using std::log;
-    return log(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto negate(const V &v) {
-  return map(v, [](auto x) { return -x; });
-}
-
-template <core::IsVecExpr V> constexpr auto sin(const V &v) {
-  return map(v, [](auto x) {
-    using std::sin;
-    return sin(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto cos(const V &v) {
-  return map(v, [](auto x) {
-    using std::cos;
-    return cos(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto tan(const V &v) {
-  return map(v, [](auto x) {
-    using std::tan;
-    return tan(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto asin(const V &v) {
-  return map(v, [](auto x) {
-    using std::asin;
-    return asin(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto acos(const V &v) {
-  return map(v, [](auto x) {
-    using std::acos;
-    return acos(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto atan(const V &v) {
-  return map(v, [](auto x) {
-    using std::atan;
-    return atan(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto floor(const V &v) {
-  return map(v, [](auto x) {
-    using std::floor;
-    return floor(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto ceil(const V &v) {
-  return map(v, [](auto x) {
-    using std::ceil;
-    return ceil(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto round(const V &v) {
-  return map(v, [](auto x) {
-    using std::round;
-    return round(x);
-  });
-}
-
-template <core::IsVecExpr V> constexpr auto sign(const V &v) {
-  return map(v, [](auto x) { return (x > 0) ? 1 : ((x < 0) ? -1 : 0); });
-}
-
-template <core::IsVecExpr V> constexpr auto fract(const V &v) {
-  return map(v, [](auto x) {
-    using std::floor;
-    return x - floor(x);
-  });
-}
-
-template <core::IsVecExpr V, core::Scalar S>
-constexpr auto clamp(const V &v, S lo, S hi) {
-  return map(v, [lo, hi](auto x) {
-    return std::clamp(x, static_cast<decltype(x)>(lo),
-                      static_cast<decltype(x)>(hi));
-  });
 }
 
 template <core::IsVecExpr V> bool all(const V &expr) {

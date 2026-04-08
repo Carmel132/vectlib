@@ -45,6 +45,14 @@ inline auto dot(Packet4d a, Packet4d b) -> double {
   return _mm256_cvtsd_f64(sum2);
 }
 
+inline auto max(Packet4d a, Packet4d b) -> Packet4d {
+  return {_mm256_max_pd(a.reg, b.reg)};
+}
+
+inline auto min(Packet4d a, Packet4d b) -> Packet4d {
+  return {_mm256_min_pd(a.reg, b.reg)};
+}
+
 inline auto sum(Packet4d a) -> double {
   __m256d sum1 = _mm256_hadd_pd(a.reg, a.reg);
   __m256d sum2 = _mm256_hadd_pd(sum1, sum1);

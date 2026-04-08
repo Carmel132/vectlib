@@ -19,7 +19,7 @@ public:
     requires std::is_arithmetic_v<U>
   explicit VecScalar(U v) : val_{static_cast<T>(v)} {}
   auto operator[](size_t idx) const -> T { return val_; }
-  [[nodiscard]] auto size() const -> size_t { return 0; }
+  [[nodiscard]] auto size() const -> size_t { return dim; }
 
   [[nodiscard]] auto loadPacket(size_t idx) const {
     using Traits = detail::SimdTraits<T, N>;

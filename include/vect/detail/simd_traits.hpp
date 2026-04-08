@@ -1,7 +1,9 @@
 #pragma once
 #include "vect/detail/simd_packet.hpp"
+#include "vect/detail/simd_packet_4d.hpp"
 
 #include <bit>
+#include <type_traits>
 namespace vect::detail
 {
 // TODO: test code without SSE support
@@ -53,17 +55,18 @@ namespace vect::detail
     template <size_t N>
     struct SimdTraits<double, N>
     {
-        #ifdef VECT_HAS_AVX
-        static constexpr bool available = (N>=4);
-        static constexpr size_t width = available ? 4 : 1;
-        using packetType = std::conditional_t<available, Packet4d, double>;
-        static constexpr size_t simdAlign = 32;
-        #else
-        static constexpr bool available = (N>= 2);
-        static constexpr size_t width = available ? 2 : 1;
-        using packetType = std::conditional_t<available, Packet2d, double>;
-        static constexpr size_t simdAlign = 16;
-        #endif
+        static constexpr bool canUseAVX = 
+    #ifdef VECT_HAS_AVX
+            (N >= 4);
+    #else
+            false;
+    #endif
+        static constexpr bool canUseSSE = (N >= 2);
+        static constexpr bool available = canUseAVX || canUseSSE;
+
+        using packetType = std::conditional_t<canUseAVX, Packet4d, std::conditional_t<canUseSSE, Packet2d, double>>;
+        static constexpr size_t width = canUseAVX ? 4 : (canUseSSE ? 2 : 1);
+        static constexpr size_t simdAlign = canUseAVX ? 32 : 16;
 
         static constexpr size_t scalarAlign = std::bit_ceil(sizeof(double) * N);
         static constexpr size_t alignment = (scalarAlign > simdAlign) ? simdAlign : scalarAlign;
@@ -74,14 +77,15 @@ namespace vect::detail
     struct SimdTraits<int, N>
     {
         #ifdef VECT_HAS_AVX
-        static constexpr bool available = (N >= 8);
-        static constexpr size_t width = available ? 8 : 1;
-        using packetType = std::conditional_t<available, Packet8i, int>;
-        static constexpr size_t simdAlign = 32;
+        static constexpr bool available = (N >= 4);
+        static constexpr bool useAVX = (N>=8);
+        using packetType = std::conditional_t<useAVX, Packet8i, std::conditional_t<available, Packet4i, int>>;
+        static constexpr size_t width = useAVX ? 8 : (available ? 4 : 1);
+        static constexpr size_t simdAlign = useAVX ? 32 : 16;
         #else
         static constexpr bool available = (N >= 4);
-        static constexpr size_t width = available ? 4 : 1;
         using packetType = std::conditional_t<available, Packet4i, int>;
+        static constexpr size_t width = available ? 4 : 1;
         static constexpr size_t simdAlign = 16;
         #endif
 

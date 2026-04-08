@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <immintrin.h>
+
 namespace vect::detail
 {
     struct Packet4f
@@ -67,7 +68,7 @@ namespace vect::detail
     inline auto sum(Packet4f a) -> float
     {
         __m128 sum1 = _mm_hadd_ps(a.reg, a.reg);
-        __m128 sum2 = _mm_hadd_ps(sum1, sum1);
+        __m128 sum2 = _mm_hadd_ps(sum1, sum1); // TODO: add support for <SSE3
         return _mm_cvtss_f32(sum2);
     }
 

@@ -19,7 +19,30 @@ namespace vect::expr
     constexpr auto dot(const L &l, const R &r)
     {
         static_assert(L::dim == R::dim, "Dot product is only defined for vectors of the same dimension");
-        return detail::dot_fold_impl(l, r, std::make_index_sequence<L::dim>{});
+
+        using T = typename L::valueType;
+        using Traits = detail::SimdTraits<T, L::dim>;
+
+        constexpr size_t imax = (L::dim / Traits::width) * Traits::width;
+        constexpr size_t tailSize = L::dim - imax;
+
+        T total = 0;
+
+        if constexpr (imax > 0) {
+            auto acc = Traits::packetType::broadcast(0);
+
+            for (size_t i = 0; i < imax; i += Traits::width) {
+                acc = acc + (l.loadPacket(i) * r.loadPacket(i));
+            }
+
+            total = detail::sum(acc);
+        }
+
+        if constexpr (tailSize > 0) {
+            total += detail::dot_tail_impl(l, r, imax, std::make_index_sequence<tailSize>{});
+        }
+
+        return total;
     }
 
     template <typename L, typename R>

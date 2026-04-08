@@ -85,6 +85,7 @@ namespace vect::core
         }
 
         [[nodiscard]] auto loadPacketUnaligned(size_t idx) const
+        requires (detail::SimdTraits<T, N>::available)
         {
             using Packet = typename detail::SimdTraits<T, N>::packetType;
             return Packet::loadUnaligned(&data_[idx]);

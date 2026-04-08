@@ -47,7 +47,7 @@ namespace vect::detail
         ;
         static constexpr size_t scalarAlign = std::bit_ceil(sizeof(float) * N);
         static constexpr size_t alignment = (scalarAlign > simdAlign) ? simdAlign : scalarAlign;
-        static constexpr bool isAligned = false;
+        static constexpr bool isAligned = true;
     };
 
     template <size_t N>
@@ -89,4 +89,7 @@ namespace vect::detail
         static constexpr size_t alignment = (scalarAlign > simdAlign) ? simdAlign : scalarAlign;
         static constexpr bool isAligned = false;
     };
+
+    template <typename T, size_t C>
+    static constexpr size_t matrix_stride_v = (C + SimdTraits<T, C>::width - 1) / SimdTraits<T, C>::width * SimdTraits<T, C>::width;
 }

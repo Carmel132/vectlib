@@ -1,9 +1,7 @@
 #pragma once
-#include <cmath>
 #include <cstddef>
 #include <utility>
 #include "vect/core/vec_expr_iterator.hpp"
-#include "vect/core/vector_iterator.hpp"
 namespace vect::core
 {
     template <typename Derived>

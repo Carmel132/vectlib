@@ -4,6 +4,10 @@
 namespace vect::expr
 {
 
+    /// @brief Expression node for component-wise binary operations on matrices
+     /// @tparam L Left-hand side matrix expression type
+     /// @tparam R Right-hand side matrix expression type
+     /// @tparam Op Binary operation type
     template <typename L, typename R, typename Op>
     class MatBinaryOp : public core::MatExpr<MatBinaryOp<L, R, Op>, typename L::valueType, L::rows, L::columns>
     {
@@ -25,5 +29,4 @@ namespace vect::expr
             return op_(l_.getRow(r), r_.getRow(r));
         }
     };
-
 }

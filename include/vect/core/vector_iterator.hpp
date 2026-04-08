@@ -1,5 +1,6 @@
 #pragma once
-
+#include <iterator>
+#include "vect/core/vec_expr_iterator.hpp"
 namespace vect::core
 {
     template <typename T>

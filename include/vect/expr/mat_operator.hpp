@@ -1,13 +1,26 @@
 #pragma once
 
 #include "vect/core/mat_expr.hpp"
-
+#include "vect/expr/mat_binary_op.hpp"
+#include "vect/expr/mat_unary_op.hpp"
+#include <functional>
 namespace vect::core
 {
 
-    template <size_t R, size_t C, typename T, IsMatExpr<R, C, T> Left, IsMatExpr<R, C, T> Right>
-    auto operator+(const Left &l, const Right &r)
+    template <IsMatExpr L, IsMatExpr R>
+    auto operator+(const L &l, const R &r)
     {
-        return expr::MatBinaryOp<Left, Right, std::plus<>>(l, r);
+        return expr::MatBinaryOp<L, R, std::plus<>>(l, r);
+    }
+
+    template <IsMatExpr L, IsMatExpr R>
+    auto operator-(const L &l, const R &r)
+    {
+        return expr::MatBinaryOp<L, R, std::minus<>>(l, r);
+    }
+
+    template <IsMatExpr M>
+    auto operator-(const M& m) {
+        return expr::MatUnaryOp<M, std::negate<>>(m);
     }
 }

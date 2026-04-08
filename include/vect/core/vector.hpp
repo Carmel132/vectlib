@@ -6,7 +6,6 @@
 #include <utility>
 #include <vect/core/vec_expr.hpp>
 
-#include <bit>
 namespace vect::core
 {
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "vect/core/mat_expr.hpp"
+#include "vect/detail/simd_traits.hpp"
 #include "vect/core/vector.hpp"
 namespace vect::core
 {
@@ -7,7 +8,7 @@ namespace vect::core
     template <typename T, size_t R, size_t C>
     class Matrix : public MatExpr<Matrix<T, R, C>, T, R, C>
     {
-        std::array<Vector<T, C>, R> rows_{};
+        std::array<Vector<T, detail::matrix_stride_v<T, C>>, R> rows_{};
 
     public:
         Matrix() = default;
@@ -25,6 +26,11 @@ namespace vect::core
                     }
                 }
             }
+        }
+
+        template <typename Expr>
+        Matrix(const MatExpr<Expr, T, R, C>& expr) {
+            *this = expr;
         }
 
         const T &at(size_t r, size_t c) const { return rows_[r][c]; }

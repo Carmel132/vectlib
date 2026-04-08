@@ -1,5 +1,4 @@
 #pragma once
-#include <cmath>
 #include <type_traits>
 namespace vect::core
 {
@@ -25,7 +24,10 @@ namespace vect::core
         using valueType = T;
     };
 
-    template <size_t R, size_t C, typename T>
     template <typename E>
-    concept IsMatExpr = std::is_base_of_v<MatExpr<std::decay_t<E>, T, R, C>, std::decay_t<E>>;
+    concept IsMatExpr = requires {
+        typename std::decay_t<E>::valueType;
+        {std::decay_t<E>::rows} -> std::convertible_to<size_t>;
+        {std::decay_t<E>::columns} -> std::convertible_to<size_t>;
+    };
 }

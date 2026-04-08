@@ -6,79 +6,117 @@
 #include "vect/expr/vector_method.hpp"
 #include <functional>
 
-
 namespace vect::expr {
-    template <typename L, typename R>
-    class MatVecMultExpr : public core::VecExpr<MatVecMultExpr<L, R>> {
-        core::capture_t<L> l_;
-        core::capture_t<R> r_;
+template <typename L, typename R>
+class MatVecMultExpr : public core::VecExpr<MatVecMultExpr<L, R>> {
+  core::capture_t<L> l_;
+  core::capture_t<R> r_;
 
-    public:
-        using valueType = std::common_type_t<typename L::valueType, typename R::valueType>;
-        static constexpr size_t dim = L::rows;
+public:
+  using valueType =
+      std::common_type_t<typename L::valueType, typename R::valueType>;
+  static constexpr size_t dim = L::rows;
 
-        MatVecMultExpr(const L& l, const R& r) : l_{l}, r_{r} {
-            static_assert(L::columns == R::dim, "Matrix columns must match vector dimension for multiplication");
-        }
+  MatVecMultExpr(const L &l, const R &r) : l_{l}, r_{r} {
+    static_assert(
+        L::columns == R::dim,
+        "Matrix columns must match vector dimension for multiplication");
+  }
 
-        [[nodiscard]] auto operator[](size_t idx) const -> valueType {
-            valueType sum = valueType{};
-            
-            auto row = l_.getRow(idx);
-            for (size_t c = 0; c < L::columns; ++c) {
-                sum += row[c] * r_[c];
-            }
-            return sum;
-        }
+  [[nodiscard]] auto operator[](size_t idx) const -> valueType {
+    valueType sum = valueType{};
 
-        [[nodiscard]] auto size() const -> size_t { return dim; }
-    
-        [[nodiscard]] auto loadPacket(size_t idx) const {
-            return loadPacketUnaligned(idx);
-        }
+    auto row = l_.getRow(idx);
+    for (size_t c = 0; c < L::columns; ++c) {
+      sum += row[c] * r_[c];
+    }
+    return sum;
+  }
 
-        [[nodiscard]] auto loadPacketUnaligned(size_t idx) const {
-            using Traits = detail::SimdTraits<valueType, dim>;
-            using Packet = typename Traits::packetType;
+  [[nodiscard]] auto size() const -> size_t { return dim; }
 
-            alignas(Traits::alignment) valueType vals[Traits::width];
+  [[nodiscard]] auto loadPacket(size_t idx) const {
+    return loadPacketUnaligned(idx);
+  }
 
-            for (size_t i = 0; i < Traits::width; ++i) {
-                if (idx + + i < dim) {
-                    vals[i] = expr::dot(l_.getRow(idx + i), r_);
-                } else {
-                    vals[i] = 0;
-                }
-            }
+  [[nodiscard]] auto loadPacketUnaligned(size_t idx) const {
+    using Traits = detail::SimdTraits<valueType, dim>;
+    using Packet = typename Traits::packetType;
 
-            return Packet::load(vals);
-        }
-    };
+    alignas(Traits::alignment) valueType vals[Traits::width];
+
+    for (size_t i = 0; i < Traits::width; ++i) {
+      if (idx + +i < dim) {
+        vals[i] = expr::dot(l_.getRow(idx + i), r_);
+      } else {
+        vals[i] = 0;
+      }
+    }
+
+    return Packet::load(vals);
+  }
+};
+
+template <typename L, typename R>
+class MatMatMultExpr
+    : public core ::MatExpr<MatMatMultExpr<L, R>, typename L::valueType,
+                            L::rows, R::columns> {
+  core::capture_t<L> l_;
+  core::capture_t<R> r_;
+
+public:
+  using T = typename L::valueType;
+
+  MatMatMultExpr(const L &l, const R &r) : l_(l), r_(r) {}
+
+  [[nodiscard]] constexpr T at(size_t r, size_t c) const {
+    return dot(l_.getRow(r), r_.getColumn(c));
+  }
+
+  template <typename Dest> void evaluateTo(Dest &C) const {
+    C.fill(0);
+    for (size_t k = 0; k < L::columns; ++k) {
+      auto colA = l_.getCol(k);
+      auto rowB = r_.getRow(k);
+
+      for (size_t i = 0; i < L::rows; ++i) {
+        C.getRow(i).multiplyAccumulate(colA[i], rowB);
+      }
+    }
+  }
+};
+} // namespace vect::expr
+
+namespace vect::core {
+
+template <IsMatExpr L, IsMatExpr R> auto operator+(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, std::plus<>>(l, r);
 }
 
-namespace vect::core
-{
-
-    template <IsMatExpr L, IsMatExpr R>
-    auto operator+(const L &l, const R &r)
-    {
-        return expr::MatBinaryOp<L, R, std::plus<>>(l, r);
-    }
-
-    template <IsMatExpr L, IsMatExpr R>
-    auto operator-(const L &l, const R &r)
-    {
-        return expr::MatBinaryOp<L, R, std::minus<>>(l, r);
-    }
-
-    template <IsMatExpr M>
-    auto operator-(const M& m) {
-        return expr::MatUnaryOp<M, std::negate<>>(m);
-    }
-
-    template <IsMatExpr M, IsVecExpr V>
-    requires (M::columns == V::dim)
-    auto operator*(const M& m, const V& v) {
-        return expr::MatVecMultExpr<M, V>(m, v);
-    }
+template <IsMatExpr L, IsMatExpr R> auto operator-(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, std::minus<>>(l, r);
 }
+
+template <IsMatExpr M> auto operator-(const M &m) {
+  return expr::MatUnaryOp<M, std::negate<>>(m);
+}
+
+template <IsMatExpr M, IsVecExpr V>
+  requires(M::columns == V::dim)
+auto operator*(const M &m, const V &v) {
+  return expr::MatVecMultExpr<M, V>(m, v);
+}
+
+template <IsMatExpr L, IsMatExpr R>
+  requires(L::columns == R::rows)
+auto operator*(const L &l, const R &r) {
+  return expr::MatMatMultExpr<L, R>(l, r);
+}
+
+template <IsMatExpr M, Scalar S> auto operator*(const M &m, const S &s) {
+  using T = typename M::valueType;
+  return expr::MatBinaryOp<M, MatScalar<T, M::rows, M::columns>,
+                           std::multiplies<>>(
+      m, MatScalar<T, M::rows, M::columns>(s));
+}
+} // namespace vect::core

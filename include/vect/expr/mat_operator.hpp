@@ -61,26 +61,24 @@ template <typename L, typename R>
 class VecMatMultExpr : public core::VecExpr<VecMatMultExpr<L, R>> {
   core::capture_t<L> l_;
   core::capture_t<R> r_;
+
 public:
   static constexpr size_t dim = R::columns;
   using valueType = typename L::valueType;
 
-  VecMatMultExpr(const L& v, const R& m) : l_(v), r_(m) {
+  VecMatMultExpr(const L &v, const R &m) : l_(v), r_(m) {
     static_assert(L::dim == R::rows,
                   "Vector dimension must match matrix rows for multiplication");
   }
 
-  void evaluateTo(auto& dest) const {
+  void evaluateTo(auto &dest) const {
     dest.fill(0);
     for (size_t i = 0; i < L::dim; ++i) {
       dest.multiplyAccumulate(l_[i], r_.getRow(i));
     }
   }
 
-  valueType operator[](size_t idx) const {
-    return dot(l_, r_.getColumn(idx));
-  }
-
+  valueType operator[](size_t idx) const { return dot(l_, r_.getColumn(idx)); }
 };
 
 template <typename L, typename R>
@@ -157,5 +155,14 @@ template <IsMatExpr M, Scalar S> auto operator*(const S &s, const M &m) {
   return expr::MatBinaryOp<MatScalar<T, M::rows, M::columns>, M,
                            std::multiplies<>>(
       MatScalar<T, M::rows, M::columns>(s), m);
+}
+
+template <IsMatExpr M>
+std::ostream &operator<<(std::ostream &os, const M &mat) {
+  for (size_t r = 0; r < M::rows; ++r) {
+    os << mat.getRow(r) << (r < M::rows - 1 ? "\n" : "");
+  }
+
+  return os;
 }
 } // namespace vect::core

@@ -3,6 +3,7 @@
 #include "vect/expr/mat_binary_op.hpp"
 #include "vect/expr/mat_method.hpp"
 #include "vect/expr/mat_operator.hpp"
+#include "vect/expr/mat_slice.hpp"
 #include "vect/expr/vector_operator.hpp"
 #include <cstddef>
 #include <functional>
@@ -19,10 +20,15 @@ template <typename T> void printMat(T mat) {
 
 auto main() -> int {
 
-  auto sq = vect::core::Matrix<float, 3, 2>{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  auto sq = vect::core::Matrix<float, 3, 3>{1, 2, 3, 4, 5, 6, 7, 8, 9};
 
+  auto res = vect::expr::MatSlice<decltype(sq), 1>(sq);
+  vect::Vector<float, 3> v{0, 1, 2};
   printMat(sq);
-  auto d = vect::expr::MatDiagView(sq);
-  std::cout << sq << "\n";
+  std::cout << "-----------\n";
+  printMat(res);
+  std::cout << res << "\n";
+  std::cout << "\n-----------instance\n" << sq.slice<1, 3, 1, 3>();
+
   return 0;
 }

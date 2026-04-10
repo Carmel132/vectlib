@@ -18,6 +18,10 @@ public:
   static constexpr size_t rows = R;
   static constexpr size_t columns = C;
   using valueType = T;
+
+  template <size_t rL = 0, size_t rR = rows, size_t cU = 0, size_t cD = columns,
+            size_t rS = 1, size_t cS = 1>
+  constexpr auto slice() const;
 };
 
 template <typename E>

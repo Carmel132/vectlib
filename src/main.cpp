@@ -26,9 +26,7 @@ auto main() -> int {
   vect::Vector<float, 3> v{0, 1, 2};
   printMat(sq);
   std::cout << "-----------\n";
-  printMat(res);
-  std::cout << res << "\n";
-  std::cout << "\n-----------instance\n" << sq.slice<1, 3, 1, 3>();
+  std::cout << vect::expr::trace(sq);
 
   return 0;
 }

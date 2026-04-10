@@ -286,7 +286,19 @@ public:
   [[nodiscard]] auto loadPacketUnaligned(size_t idx) const {
     using Traits = detail::SimdTraits<valueType, dim>;
     using Packet = typename Traits::packetType;
-    // TODO: AVX optimization?
+#ifdef VECT_HAS_AVX
+    if constexpr (Traits::width == 8 && std::is_same_v<valueType, float>) {
+      constexpr int stride = static_cast<int>(M::columns + 1);
+
+      __m256i offsets =
+          _mm256_set_epi32(7 * stride, 6 * stride, 5 * stride, 4 * stride,
+                           3 * stride, 2 * stride, 1 * stride, 0);
+
+      const float *base = &m_.at(idx, idx);
+      return _mm256_i32gather_ps(base, offsets, 4);
+    }
+
+#endif
     alignas(Traits::alignment) valueType vals[Traits::width];
     for (size_t i = 0; i < Traits::width; ++i) {
       if (idx + i < dim) {
@@ -300,6 +312,10 @@ public:
 };
 template <core::IsMatExpr M> auto diag(const M &mat) {
   return MatDiagView(mat);
+}
+
+template <core::IsMatExpr M> auto trace(const M &mat) {
+  return diag(mat).reduce(std::plus<>{}, 0.0f);
 }
 
 } // namespace vect::expr

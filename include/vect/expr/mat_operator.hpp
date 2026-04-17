@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vect/core/mat_expr.hpp"
+#include "vect/detail/simd_comparison.hpp"
 #include "vect/expr/mat_binary_op.hpp"
 #include "vect/expr/mat_unary_op.hpp"
 #include "vect/expr/vector_method.hpp"
@@ -164,5 +165,9 @@ std::ostream &operator<<(std::ostream &os, const M &mat) {
   }
 
   return os;
+}
+
+template <IsMatExpr L, IsMatExpr R> auto operator<(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, detail::ComparisonLess>(l, r);
 }
 } // namespace vect::core

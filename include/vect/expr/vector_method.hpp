@@ -179,7 +179,7 @@ template <core::IsVecExpr V> bool any(const V &expr) {
   return false;
 }
 
-template <typename M, typename T, typename F>
+template <core::IsVecExpr M, core::IsVecExpr T, core::IsVecExpr F>
 auto where(const M &mask, const T &ifTrue, const F &ifFalse) {
   return WhereOp<M, T, F>(mask, ifTrue, ifFalse);
 }

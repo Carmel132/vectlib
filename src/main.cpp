@@ -22,11 +22,11 @@ auto main() -> int {
 
   auto sq = vect::core::Matrix<float, 3, 3>{1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-  auto res = vect::expr::MatSlice<decltype(sq), 1>(sq);
-  vect::Vector<float, 3> v{0, 1, 2};
-  printMat(sq);
-  std::cout << "-----------\n";
-  std::cout << vect::expr::trace(sq);
+  auto tst = vect::core::Matrix<float, 3, 3>{1, -2, 3, -4, 5, -6, 7, -8, 9};
 
+  std::cout << tst << "\n" << sq << "\n" << (tst < sq) << "\n";
+  std::cout << vect::expr::where(tst < sq, tst, sq);
+  std::cout << "\n\n";
+  printMat((tst < sq));
   return 0;
 }

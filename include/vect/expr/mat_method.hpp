@@ -5,6 +5,7 @@
 #include "vect/core/vec_expr.hpp"
 #include "vect/expr/mat_column_view.hpp"
 #include "vect/expr/mat_unary_op.hpp"
+#include "vect/expr/where_op.hpp"
 namespace vect::detail {
 template <size_t R, typename M, typename V, typename Op>
 auto column_reduce_helper(const M &mat, const V &acc, Op op) {
@@ -316,6 +317,11 @@ template <core::IsMatExpr M> auto diag(const M &mat) {
 
 template <core::IsMatExpr M> auto trace(const M &mat) {
   return diag(mat).reduce(std::plus<>{}, 0.0f);
+}
+
+template <core::IsMatExpr M, core::IsMatExpr T, core::IsMatExpr F>
+auto where(const M &mask, const T &ifTrue, const F &ifFalse) {
+  return expr::MatWhereOp<M, T, F>(mask, ifTrue, ifFalse);
 }
 
 } // namespace vect::expr

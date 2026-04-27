@@ -1,5 +1,6 @@
 #pragma once
 #include "vect/core/mat_expr.hpp"
+#include "vect/expr/binary_op.hpp"
 #include "vect/expr/capture_strategy.hpp"
 namespace vect::expr
 {

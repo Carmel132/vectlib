@@ -170,4 +170,16 @@ std::ostream &operator<<(std::ostream &os, const M &mat) {
 template <IsMatExpr L, IsMatExpr R> auto operator<(const L &l, const R &r) {
   return expr::MatBinaryOp<L, R, detail::ComparisonLess>(l, r);
 }
+
+template <IsMatExpr L, IsMatExpr R> auto operator>(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, detail::ComparisonGreater>(l, r);
+}
+
+template <IsMatExpr L, IsMatExpr R> auto operator<=(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, detail::ComparisonLessEqual>(l, r);
+}
+
+template <IsMatExpr L, IsMatExpr R> auto operator>=(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, detail::ComparisonGreaterEqual>(l, r);
+}
 } // namespace vect::core

@@ -24,9 +24,7 @@ auto main() -> int {
 
   auto tst = vect::core::Matrix<float, 3, 3>{1, -2, 3, -4, 5, -6, 7, -8, 9};
 
-  std::cout << tst << "\n" << sq << "\n" << (tst < sq) << "\n";
-  std::cout << vect::expr::where(tst < sq, tst, sq);
+  std::cout  << tst << "\n\n" << sq << "\n\n" << (tst < sq) << "\n\n" << vect::expr::where(tst < sq, tst, sq);
   std::cout << "\n\n";
-  printMat((tst < sq));
   return 0;
 }

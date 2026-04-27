@@ -13,7 +13,7 @@ public:
 
   auto operator()(size_t r, size_t c) const { return self().at(r, c); }
 
-  auto row(size_t r) const { return self().getRow(r); }
+  auto getRow(size_t r) const { return self().getRow(r); }
 
   static constexpr size_t rows = R;
   static constexpr size_t columns = C;

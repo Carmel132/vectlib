@@ -4,11 +4,17 @@
 #include "vect/detail/defer_eval.hpp"
 #include "vect/detail/simd_traits.hpp"
 #include "vect/expr/mat_column_view.hpp"
+#include "vect/core/vec_expr.hpp"
+
 namespace vect::core {
 
 template <typename T, size_t R, size_t C>
 class Matrix : public MatExpr<Matrix<T, R, C>, T, R, C> {
   std::array<Vector<T, detail::matrix_stride_v<T, C>>, R> rows_{};
+
+  template <typename M>
+  class MatRowView;
+  friend MatRowView<Matrix<T, R, C>>;
 
 public:
   Matrix() = default;
@@ -31,8 +37,12 @@ public:
   const T &at(size_t r, size_t c) const { return rows_[r][c]; }
   T &at(size_t r, size_t c) { return rows_[r][c]; }
 
-  auto &getRow(size_t r) { return rows_[r]; }
-  const auto &getRow(size_t r) const { return rows_[r]; }
+  auto &getRow(size_t r) {
+    return rows_[r];
+  }
+  auto getRow(size_t r) const {
+    return MatRowView<Matrix<T, R, C>>(*this, r);
+  }
 
   [[nodiscard]] auto getColumn(size_t c) const {
     return vect::expr::MatColumnView<Matrix<T, R, C>>(*this, c);
@@ -53,11 +63,35 @@ public:
       expr.self().evaluateTo(*this);
     } else {
       for (size_t r = 0; r < R; ++r) {
-        rows_[r] = expr.row(r);
+        rows_[r] = expr.getRow(r);
       }
     }
 
     return *this;
   }
+
+  
 };
+
+template <typename T, size_t R, size_t C>
+template <typename M>
+class Matrix<T, R, C>::MatRowView : public VecExpr<MatRowView<M>> {
+    core::capture_t<M> m_;
+        size_t rowIdx_;
+    public:
+        using valueType = typename M::valueType;
+        static constexpr size_t dim = M::columns;
+
+        MatRowView(const M& m, size_t r) : m_(m), rowIdx_(r) {}
+
+        [[nodiscard]] auto operator[](size_t idx) const {
+            return m_.at(rowIdx_, idx);
+        }
+
+        auto loadPacket(size_t idx) const {
+            return m_.rows_[rowIdx_].loadPacket(idx);
+        }
+
+        [[nodiscard]] constexpr size_t size() const { return dim; }
+    };
 } // namespace vect::core

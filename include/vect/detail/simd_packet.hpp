@@ -7,8 +7,7 @@
 #include "vect/detail/simd_packet_4i.hpp"
 #include "vect/detail/simd_packet_4d.hpp"
 namespace vect::detail
-{
-  
+{  
 
   
 }

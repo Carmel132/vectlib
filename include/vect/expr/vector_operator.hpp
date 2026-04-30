@@ -14,8 +14,28 @@ template <IsVecExpr L, IsVecExpr R> auto operator+(const L &l, const R &r) {
   return expr::BinaryOp<L, R, std::plus<>>(l, r);
 }
 
+template <IsVecExpr V, Scalar S> auto operator+(const V &v, S s) {
+  using ScalarExpr = VecScalar<S, V::dim>;
+  return expr::BinaryOp<V, ScalarExpr, std::plus<>>(v, ScalarExpr(s));
+}
+
+template <IsVecExpr V, Scalar S> auto operator+(S s, const V &v) {
+  using ScalarExpr = VecScalar<S, V::dim>;
+  return expr::BinaryOp<ScalarExpr, V, std::plus<>>(ScalarExpr(s), v);
+}
+
 template <IsVecExpr L, IsVecExpr R> auto operator-(const L &l, const R &r) {
   return expr::BinaryOp<L, R, std::minus<>>(l, r);
+}
+
+template <IsVecExpr V, Scalar S> auto operator-(const V &v, S s) {
+  using ScalarExpr = VecScalar<S, V::dim>;
+  return expr::BinaryOp<V, ScalarExpr, std::minus<>>(v, ScalarExpr(s));
+}
+
+template <IsVecExpr V, Scalar S> auto operator-(S s, const V &v) {
+  using ScalarExpr = VecScalar<S, V::dim>;
+  return expr::BinaryOp<ScalarExpr, V, std::minus<>>(ScalarExpr(s), v);
 }
 
 template <IsVecExpr V> constexpr auto operator-(const V &v) {
@@ -35,10 +55,18 @@ template <IsVecExpr V, Scalar S> auto operator*(const V &v, S s) {
 template <Scalar S, IsVecExpr V> auto operator*(S s, const V &v) {
   return v * s;
 }
-
+// Component-wise and scalar division
+template <IsVecExpr L, IsVecExpr R> auto operator/(const L &l, const R &r) {
+  return expr::BinaryOp<L, R, std::divides<>>(l, r);
+}
 template <IsVecExpr V, Scalar S> auto operator/(const V &v, S s) {
   using ScalarExpr = VecScalar<S, V::dim>;
   return expr::BinaryOp<V, ScalarExpr, std::divides<>>(v, ScalarExpr(s));
+}
+
+template <IsVecExpr V, Scalar S> auto operator/(S s, const V &v) {
+  using ScalarExpr = VecScalar<S, V::dim>;
+  return expr::BinaryOp<V, ScalarExpr, std::divides<>>(ScalarExpr(s), v);
 }
 
 template <IsVecExpr V> std::ostream &operator<<(std::ostream &os, const V &v) {

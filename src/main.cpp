@@ -20,18 +20,12 @@ template <typename T> void printMat(T mat) {
 
 auto main() -> int {
 
-  auto sq = vect::core::Matrix<float, 3, 3>{1, 2, 3, 4, 5, 6, 7, 8, 9};
-
   auto tst = vect::core::Matrix<float, 3, 3>{1, -2, 3, -4, 5, -6, 7, -8, 9};
 
-  auto mask =
-      vect::core::Matrix<float, 3, 3>{-1, -3, -3, -5, -5, -7, 10, 10, 10} < tst;
-
   std::cout << tst << "\n\n"
-            << sq << "\n\n"
-            << (tst < sq) << "\n\n"
-            << vect::expr::where(tst < sq, tst, sq) << "\n\n"
-            << (!(tst < sq)) << "\n\n";
+            << tst.getRow(1) << "\n\n"
+            << (1 - tst.getRow(1) + 1);
+
   std::cout << "\n\n";
   return 0;
 }

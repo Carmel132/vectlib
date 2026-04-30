@@ -24,7 +24,14 @@ auto main() -> int {
 
   auto tst = vect::core::Matrix<float, 3, 3>{1, -2, 3, -4, 5, -6, 7, -8, 9};
 
-  std::cout  << tst << "\n\n" << sq << "\n\n" << (tst < sq) << "\n\n" << vect::expr::where(tst < sq, tst, sq);
+  auto mask =
+      vect::core::Matrix<float, 3, 3>{-1, -3, -3, -5, -5, -7, 10, 10, 10} < tst;
+
+  std::cout << tst << "\n\n"
+            << sq << "\n\n"
+            << (tst < sq) << "\n\n"
+            << vect::expr::where(tst < sq, tst, sq) << "\n\n"
+            << (!(tst < sq)) << "\n\n";
   std::cout << "\n\n";
   return 0;
 }

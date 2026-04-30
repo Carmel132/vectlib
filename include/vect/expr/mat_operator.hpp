@@ -183,11 +183,23 @@ template <IsMatExpr L, IsMatExpr R> auto operator>=(const L &l, const R &r) {
   return expr::MatBinaryOp<L, R, detail::ComparisonGreaterEqual>(l, r);
 }
 
-template <IsMatExpr L, IsMatExpr R> auto operator==(const L& l, const R& r) {
+template <IsMatExpr L, IsMatExpr R> auto operator==(const L &l, const R &r) {
   return expr::MatBinaryOp<L, R, detail::ComparisonEqual>(l, r);
 }
 
-template <IsMatExpr L, IsMatExpr R> auto operator!=(const L& l, const R& r) {
+template <IsMatExpr L, IsMatExpr R> auto operator!=(const L &l, const R &r) {
   return expr::MatBinaryOp<L, R, detail::ComparisonNotEqual>(l, r);
+}
+
+template <IsMatExpr L, IsMatExpr R> auto operator&&(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, detail::LogicalAnd>(l, r);
+}
+
+template <IsMatExpr L, IsMatExpr R> auto operator||(const L &l, const R &r) {
+  return expr::MatBinaryOp<L, R, detail::LogicalOr>(l, r);
+}
+
+template <IsMatExpr M> auto operator!(const M &m) {
+  return expr::MatUnaryOp<M, detail::LogicalNot>(m);
 }
 } // namespace vect::core

@@ -5,6 +5,7 @@
 #include "vect/core/vec_expr.hpp"
 #include "vect/expr/mat_column_view.hpp"
 #include "vect/expr/mat_unary_op.hpp"
+#include "vect/expr/mat_vec_broadcast.hpp"
 #include "vect/expr/where_op.hpp"
 namespace vect::detail {
 template <size_t R, typename M, typename V, typename Op>
@@ -322,6 +323,19 @@ template <core::IsMatExpr M> auto trace(const M &mat) {
 template <core::IsMatExpr M, core::IsMatExpr T, core::IsMatExpr F>
 auto where(const M &mask, const T &ifTrue, const F &ifFalse) {
   return expr::MatWhereOp<M, T, F>(mask, ifTrue, ifFalse);
+}
+
+enum class BroadcastAxis { ROW, COLUMN };
+
+template <size_t Dim, BroadcastAxis Axis>
+constexpr auto broadcastTo(const auto &v) {
+
+  if constexpr (Axis == BroadcastAxis::ROW) {
+    return expr::MatBroadcastColumnVectorExpr<std::decay_t<decltype(v)>, Dim>(
+        v);
+  } else {
+    return expr::MatBroadcastRowVectorExpr<std::decay_t<decltype(v)>, Dim>(v);
+  }
 }
 
 } // namespace vect::expr

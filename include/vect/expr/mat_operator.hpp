@@ -3,6 +3,7 @@
 #include "vect/core/mat_expr.hpp"
 #include "vect/detail/simd_comparison.hpp"
 #include "vect/expr/mat_binary_op.hpp"
+#include "vect/expr/mat_method.hpp"
 #include "vect/expr/mat_unary_op.hpp"
 #include "vect/expr/vector_method.hpp"
 #include <functional>
@@ -113,9 +114,25 @@ public:
 } // namespace vect::expr
 
 namespace vect::core {
-
+// Matrix addition
 template <IsMatExpr L, IsMatExpr R> auto operator+(const L &l, const R &r) {
   return expr::MatBinaryOp<L, R, std::plus<>>(l, r);
+}
+template <IsMatExpr M, IsVecExpr V> auto operator+(const M &m, const V &v) {
+  // Prioritize row-wise broadcasting
+  if constexpr (M::rows == V::dim) {
+    return m + expr::broadcastTo<M::columns, expr::BroadcastAxis::COLUMN>(v);
+  } else if constexpr (M::columns == V::dim) {
+    return m + expr::broadcastTo<M::rows, expr::BroadcastAxis::ROW>(v);
+  }
+}
+template <IsMatExpr M, IsVecExpr V> auto operator+(const V &v, const M &m) {
+  // Prioritize row-wise broadcasting
+  if constexpr (M::rows == V::dim) {
+    return expr::broadcastTo<M::columns, expr::BroadcastAxis::COLUMN>(v) + m;
+  } else if constexpr (M::columns == V::dim) {
+    return expr::broadcastTo<M::rows, expr::BroadcastAxis::ROW>(v) + m;
+  }
 }
 
 template <IsMatExpr L, IsMatExpr R> auto operator-(const L &l, const R &r) {

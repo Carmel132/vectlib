@@ -4,6 +4,7 @@
 #include "vect/expr/mat_method.hpp"
 #include "vect/expr/mat_operator.hpp"
 #include "vect/expr/mat_slice.hpp"
+#include "vect/expr/mat_vec_broadcast.hpp"
 #include "vect/expr/vector_operator.hpp"
 #include <cstddef>
 #include <functional>
@@ -22,10 +23,15 @@ auto main() -> int {
 
   auto tst = vect::core::Matrix<float, 3, 3>{1, -2, 3, -4, 5, -6, 7, -8, 9};
 
-  std::cout << tst << "\n\n"
-            << tst.getRow(1) << "\n\n"
-            << (1 - tst.getRow(1) + 1);
+  std::cout << tst << "\n\n";
 
+  auto broadcast =
+      vect::expr::broadcastTo<3, vect::expr::BroadcastAxis::ROW>(tst.getRow(1));
+
+  std::cout << broadcast << "\n\n";
+  std::cout << (tst + tst.getRow(1)) << "\n\n";
+  std::cout << "\n\n";
+  std::cout << (tst.getRow(1) + broadcast.getRow(1));
   std::cout << "\n\n";
   return 0;
 }

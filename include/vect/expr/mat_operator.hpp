@@ -127,7 +127,6 @@ template <IsMatExpr M, IsVecExpr V> auto operator+(const M &m, const V &v) {
   }
 }
 template <IsMatExpr M, IsVecExpr V> auto operator+(const V &v, const M &m) {
-  // Prioritize row-wise broadcasting
   if constexpr (M::rows == V::dim) {
     return expr::broadcastTo<M::columns, expr::BroadcastAxis::COLUMN>(v) + m;
   } else if constexpr (M::columns == V::dim) {
@@ -137,6 +136,20 @@ template <IsMatExpr M, IsVecExpr V> auto operator+(const V &v, const M &m) {
 
 template <IsMatExpr L, IsMatExpr R> auto operator-(const L &l, const R &r) {
   return expr::MatBinaryOp<L, R, std::minus<>>(l, r);
+}
+template <IsMatExpr M, IsVecExpr V> auto operator-(const M &m, const V &v) {
+  if constexpr (M::rows == V::dim) {
+    return m - expr::broadcastTo<M::columns, expr::BroadcastAxis::COLUMN>(v);
+  } else if constexpr (M::columns == V::dim) {
+    return m - expr::broadcastTo<M::rows, expr::BroadcastAxis::ROW>(v);
+  }
+}
+template <IsMatExpr M, IsVecExpr V> auto operator-(const V &v, const M &m) {
+  if constexpr (M::rows == V::dim) {
+    return expr::broadcastTo<M::columns, expr::BroadcastAxis::COLUMN>(v) - m;
+  } else if constexpr (M::columns == V::dim) {
+    return expr::broadcastTo<M::rows, expr::BroadcastAxis::ROW>(v) - m;
+  }
 }
 
 template <IsMatExpr M> auto operator-(const M &m) {
